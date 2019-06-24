@@ -14,6 +14,14 @@
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
 #include "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 
+
+static void printTree(SemanticsObject* root, NSString *prefix) {
+  NSLog(@"%@ uid: %@, copyID: %@, isPlatformView: %@, isLeaf: %@", prefix, @(root.uid), @(root.copyID), @(root.platformViewSemanticsContainer != nil), @(root.children.count == 0));
+  for (SemanticsObject* node in root.children) {
+    printTree(node, [prefix stringByAppendingString:@"--"]);
+  }
+}
+
 namespace {
 
 constexpr int32_t kRootNodeId = 0;
@@ -115,6 +123,7 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
     _bridge = bridge;
     _uid = uid;
     _children = [[NSMutableArray alloc] init];
+    self.copyID = -1;
   }
 
   return self;
@@ -606,6 +615,8 @@ void AccessibilityBridge::UpdateSemantics(flutter::SemanticsNodeUpdates nodes,
     NSUInteger newChildCount = node.childrenInTraversalOrder.size();
     NSMutableArray* newChildren =
         [[[NSMutableArray alloc] initWithCapacity:newChildCount] autorelease];
+
+    SemanticsNode
     for (NSUInteger i = 0; i < newChildCount; ++i) {
       SemanticsObject* child = GetOrCreateObject(node.childrenInTraversalOrder[i], nodes);
       child.parent = object;
@@ -646,6 +657,7 @@ void AccessibilityBridge::UpdateSemantics(flutter::SemanticsNodeUpdates nodes,
   }
 
   SemanticsObject* root = objects_.get()[@(kRootNodeId)];
+  printTree(root, @"-");
 
   bool routeChanged = false;
   SemanticsObject* lastAdded = nil;
@@ -782,3 +794,4 @@ void AccessibilityBridge::clearState() {
 }
 
 }  // namespace flutter
+\

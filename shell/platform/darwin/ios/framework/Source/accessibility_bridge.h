@@ -34,6 +34,10 @@ class AccessibilityBridge;
  */
 @interface SemanticsObject : NSObject
 
+@property(nonatomic, strong) SemanticsObject* linkedSemanticsObject;
+
+@property(nonatomic, assign) int32_t copyID;
+
 /**
  * The globally unique identifier for this node.
  */
