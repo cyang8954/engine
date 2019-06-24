@@ -608,20 +608,28 @@ UIView<UITextInput>* AccessibilityBridge::textInputView() {
   return [platform_view_->GetTextInputPlugin() textInputView];
 }
 
-void AccessibilityBridge::RecursivelyCopyParentSemanticsNode(SemanticsObject* original, SemanticsObject* copyObject) {
-  if (original.parent) {
-    SemanticsObject* copyObjectParent = original.parent.copy;
-    NSInteger index = [original.parent.children indexOfObject:original];
-    NSMutableArray *newTotalChildren = original.parent.children.mutableCopy;
-    [newTotalChildren insertObject:copyObject atIndex:index+1];
-    NSArray *leftPart = [newTotalChildren subarrayWithRange:NSMakeRange(0, index+1)];
-    NSArray *rightPart = [newTotalChildren subarrayWithRange:NSMakeRange(index+1, newTotalChildren.count-index-1)];
-    original.parent.children = [NSMutableArray arrayWithArray:leftPart];
-    copyObjectParent.children = [NSMutableArray arrayWithArray:rightPart];
-    original.parent.twinSemanticsObject = copyObjectParent;
-    copyObject.parent = copyObjectParent;
-    copyObjectParent.copyID = copyObject.copyID;
-    RecursivelyCopyParentSemanticsNode(original.parent, copyObjectParent);
+void AccessibilityBridge::RecursivelyCopyParentSemanticsNode(SemanticsObject* node) {
+  if (node.parent) {
+    SemanticsObject* parentCopy = nil;
+    NSMutableArray *siblings = node.parent.children;
+    NSInteger index = [siblings indexOfObject:node];
+
+    if (node.twinSemanticsObject) {
+      [siblings insertObject:node.twinSemanticsObject atIndex:index];
+    }
+
+    NSArray *leftPart = [siblings subarrayWithRange:NSMakeRange(0, index+1)];
+    node.parent.children = [NSMutableArray arrayWithArray:leftPart];
+    NSArray *rightPart = [siblings subarrayWithRange:NSMakeRange(index+1, siblings.count-index-1)];
+    if (rightPart) {
+      parentCopy = node.parent.copy;
+      parentCopy.children = [NSMutableArray arrayWithArray:rightPart];
+      node.parent.twinSemanticsObject = parentCopy;
+      SemanticsObject *nextNode = rightPart.firstObject;
+      nextNode.parent = parentCopy;
+      parentCopy.copyID = nextNode.copyID;
+    }
+    RecursivelyCopyParentSemanticsNode(node.parent);
   }
 }
 
@@ -633,6 +641,7 @@ void AccessibilityBridge::UpdateSemantics(flutter::SemanticsNodeUpdates nodes,
     const flutter::CustomAccessibilityAction& action = entry.second;
     actions_[action.id] = action;
   }
+  NSMutableArray *platformViewNodeArray = [[NSMutableArray new] autorelease];
   for (const auto& entry : nodes) {
     const flutter::SemanticsNode& node = entry.second;
     SemanticsObject* object = GetOrCreateObject(node.id, nodes);
@@ -641,48 +650,14 @@ void AccessibilityBridge::UpdateSemantics(flutter::SemanticsNodeUpdates nodes,
     [object setSemanticsNode:&node];
     NSUInteger newChildCount = node.childrenInTraversalOrder.size();
     NSMutableArray* newChildren =
-        [[[NSMutableArray alloc] init] autorelease];
+        [[[NSMutableArray alloc] initWithCapacity:newChildCount] autorelease];
 
-    SemanticsObject* preivousActiveParent = nil;
-    SemanticsObject* activeParent = object;
-    NSInteger copyID = -1;
     for (NSUInteger i = 0; i < newChildCount; ++i) {
       SemanticsObject* child = GetOrCreateObject(node.childrenInTraversalOrder[i], nodes);
-      child.parent = activeParent;
-      child.copyID = copyID;
+      child.parent = object;
       [newChildren addObject:child];
-      while ((child && child.node.IsPlatformViewNode()) || child.twinSemanticsObject) {
-        // Handling copy.
-        activeParent.children = [NSMutableArray arrayWithArray:newChildren];
-        SemanticsObject* copyObject = object.copy;
-        if ((child && child.node.IsPlatformViewNode())) {
-          copyID = child.node.platformViewId;
-        } else {
-          copyID = child.copyID;
-        }
-        copyObject.copyID = copyID;
-        RecursivelyCopyParentSemanticsNode(activeParent, copyObject);
-
-        activeParent.twinSemanticsObject = copyObject;
-        preivousActiveParent = activeParent;
-        activeParent = copyObject;
-        [newChildren removeAllObjects];
-        if (child.twinSemanticsObject) {
-          [newChildren addObject:child.twinSemanticsObject];
-          child = child.twinSemanticsObject;
-        } else {
-          child = nil;
-        }
-      }
     }
-    if (newChildren.count == 0) {
-      [activeParent.parent.children removeObject:activeParent];
-      activeParent.parent = nil;
-      preivousActiveParent.twinSemanticsObject = nil;
-      [activeParent release];
-    } else {
-      activeParent.children = newChildren;
-    }
+    object.children = newChildren;
 
     if (node.customAccessibilityActions.size() > 0) {
       NSMutableArray<FlutterCustomAccessibilityAction*>* accessibilityCustomActions =
@@ -712,9 +687,14 @@ void AccessibilityBridge::UpdateSemantics(flutter::SemanticsNodeUpdates nodes,
         object.platformViewSemanticsContainer =
             [[FlutterPlatformViewSemanticsContainer alloc] initWithSemanticsObject:object];
       }
+      [platformViewNodeArray addObject:object];
     } else if (object.platformViewSemanticsContainer) {
       [object.platformViewSemanticsContainer release];
     }
+  }
+
+  for (SemanticsObject *platformViewNode in platformViewNodeArray) {
+    RecursivelyCopyParentSemanticsNode(platformViewNode);
   }
 
   SemanticsObject* root = objects_.get()[@(kRootNodeId)];

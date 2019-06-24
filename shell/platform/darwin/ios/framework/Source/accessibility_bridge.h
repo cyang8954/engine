@@ -160,8 +160,8 @@ class AccessibilityBridge final {
                                flutter::SemanticsAction action,
                                std::vector<uint8_t> args);
 
-  void RecursivelyCopyParentSemanticsNode(SemanticsObject* original, SemanticsObject* copyObject);
-
+  void RecursivelyCopyParentSemanticsNode(SemanticsObject* node);
+  
   UIView<UITextInput>* textInputView();
 
   UIView* view() const { return view_; }
