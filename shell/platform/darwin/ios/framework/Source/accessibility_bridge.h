@@ -34,7 +34,7 @@ class AccessibilityBridge;
  */
 @interface SemanticsObject : NSObject
 
-@property(nonatomic, strong) SemanticsObject* linkedSemanticsObject;
+@property(nonatomic, strong) SemanticsObject* twinSemanticsObject;
 
 @property(nonatomic, assign) int32_t copyID;
 
@@ -159,6 +159,8 @@ class AccessibilityBridge final {
   void DispatchSemanticsAction(int32_t id,
                                flutter::SemanticsAction action,
                                std::vector<uint8_t> args);
+
+  void RecursivelyCopyParentSemanticsNode(SemanticsObject* original, SemanticsObject* copyObject);
 
   UIView<UITextInput>* textInputView();
 
