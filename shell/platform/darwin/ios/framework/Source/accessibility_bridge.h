@@ -159,8 +159,6 @@ class AccessibilityBridge final {
   void DispatchSemanticsAction(int32_t id,
                                flutter::SemanticsAction action,
                                std::vector<uint8_t> args);
-
-  void RecursivelyCopyParentSemanticsNode(SemanticsObject* node);
   
   UIView<UITextInput>* textInputView();
 
@@ -175,6 +173,10 @@ class AccessibilityBridge final {
   void clearState();
 
  private:
+  void RecursivelyCopyParentSemanticsNode(SemanticsObject* node);
+  void SplitTree(const flutter::SemanticsNode& root, int32_t tree_id, flutter::SemanticsNodeUpdates allNodes);
+  std::vector<std::shared_ptr<flutter::SemanticsNode>> slipt_tree_stack;
+
   SemanticsObject* GetOrCreateObject(int32_t id, flutter::SemanticsNodeUpdates& updates);
   void VisitObjectsRecursivelyAndRemove(SemanticsObject* object,
                                         NSMutableArray<NSNumber*>* doomed_uids);
@@ -189,6 +191,7 @@ class AccessibilityBridge final {
   int32_t previous_route_id_;
   std::unordered_map<int32_t, flutter::CustomAccessibilityAction> actions_;
   std::vector<int32_t> previous_routes_;
+  std::map<int32_t, SemanticsNodeUpdates> splittedTrees;
 
   FML_DISALLOW_COPY_AND_ASSIGN(AccessibilityBridge);
 };

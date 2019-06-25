@@ -633,8 +633,23 @@ void AccessibilityBridge::RecursivelyCopyParentSemanticsNode(SemanticsObject* no
   }
 }
 
+void AccessibilityBridge::SplitTree(const flutter::SemanticsNode& node, int32_t tree_id, flutter::SemanticsNodeUpdates allNodes) {
+  slipt_tree_stack.push_back(std::make_shared<SemanticsNode>(node));
+  SemanticsNode copy = SemanticsNode(node);
+  NSUInteger children_count = node.childrenInTraversalOrder.size();
+  for (NSUInteger i = 0; i < children_count; ++i) {
+    SemanticsNode child = allNodes[node.childrenInTraversalOrder[i]];
+    copy.childrenInTraversalOrder.push_back(child.id);
+    
+  }
+}
+
 void AccessibilityBridge::UpdateSemantics(flutter::SemanticsNodeUpdates nodes,
                                           flutter::CustomAccessibilityActionUpdates actions) {
+  SemanticsNodeUpdates final_roots;
+  SemanticsNodeUpdates new_updates;
+  SplitTree(nodes[kRootNodeId], 0, nodes);
+  
   BOOL layoutChanged = NO;
   BOOL scrollOccured = NO;
   for (const auto& entry : actions) {
