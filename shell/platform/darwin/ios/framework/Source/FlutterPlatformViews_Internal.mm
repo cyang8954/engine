@@ -38,15 +38,54 @@ CATransform3D GetCATransform3DFromSkMatrix(const SkMatrix& matrix) {
   return transform;
 }
 
-void ResetAnchor(CALayer* layer) {
+void ResetAnchor(UIView *view) {
   // Flow uses (0, 0) to apply transform matrix so we need to match that in Quartz.
-  layer.anchorPoint = CGPointZero;
-  layer.position = CGPointZero;
+  //view.layer.position = CGPointMake(view.frame.origin.x, view.frame.origin.y);
+  CGPoint anchorPoint = CGPointMake(-view.frame.origin.x/view.frame.size.width, -view.frame.origin.y/view.frame.size.height);
+
+  CGPoint newPoint = CGPointMake(view.bounds.size.width * anchorPoint.x,
+                                 view.bounds.size.height * anchorPoint.y);
+  CGPoint oldPoint = CGPointMake(view.bounds.size.width * view.layer.anchorPoint.x,
+                                 view.bounds.size.height * view.layer.anchorPoint.y);
+
+  newPoint = CGPointApplyAffineTransform(newPoint, view.transform);
+  oldPoint = CGPointApplyAffineTransform(oldPoint, view.transform);
+
+  CGPoint position = view.layer.position;
+
+  position.x -= oldPoint.x;
+  position.x += newPoint.x;
+
+  position.y -= oldPoint.y;
+  position.y += newPoint.y;
+
+  view.layer.position = position;
+  view.layer.anchorPoint = anchorPoint;
 }
 
 }  // namespace flutter
 
+@interface ChildClippingView()
+
+@property(assign, nonatomic) UIView *flutterView;;
+
+@end
+
 @implementation ChildClippingView
+
+- (void)dealloc {
+  [super dealloc];
+  self.flutterView = nil;
+}
+
+- (instancetype)initWithFlutterView:(UIView *)flutterView
+{
+  self = [super init];
+  if (self) {
+    self.flutterView = flutterView;
+  }
+  return self;
+}
 
 + (CGRect)getCGRectFromSkRect:(const SkRect&)clipSkRect {
   return CGRectMake(clipSkRect.fLeft, clipSkRect.fTop, clipSkRect.fRight - clipSkRect.fLeft,
@@ -55,6 +94,7 @@ void ResetAnchor(CALayer* layer) {
 
 - (void)clipRect:(const SkRect&)clipSkRect {
   CGRect clipRect = [ChildClippingView getCGRectFromSkRect:clipSkRect];
+  clipRect = [self.flutterView convertRect:clipRect toView:self];
   CGPathRef pathRef = CGPathCreateWithRect(clipRect, nil);
   CAShapeLayer* clip = [[CAShapeLayer alloc] init];
   clip.path = pathRef;
@@ -126,6 +166,10 @@ void ResetAnchor(CALayer* layer) {
   // the CAShaperLayer will be drawn antialiased. Need to figure out a way to do the hard edge
   // clipping on iOS.
   CAShapeLayer* clip = [[CAShapeLayer alloc] init];
+
+  CGAffineTransform transform = CGAffineTransformMakeTranslation(-self.frame.origin.x, -self.frame.origin.y);
+  pathRef = CGPathCreateCopyByTransformingPath(pathRef, &transform);
+
   clip.path = pathRef;
   self.layer.mask = clip;
   CGPathRelease(pathRef);

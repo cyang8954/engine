@@ -31,6 +31,8 @@
 // The parent view handles clipping to its subviews.
 @interface ChildClippingView : UIView
 
+- (instancetype)initWithFlutterView:(UIView *)flutterView;
+
 // Performs the clipping based on the type.
 //
 // The `type` must be one of the 3: clip_rect, clip_rrect, clip_path.
@@ -48,7 +50,7 @@ CATransform3D GetCATransform3DFromSkMatrix(const SkMatrix& matrix);
 
 // Reset the anchor of `layer` to match the tranform operation from flow.
 // The position of the `layer` should be unchanged after resetting the anchor.
-void ResetAnchor(CALayer* layer);
+void ResetAnchor(UIView* view);
 
 class IOSGLContext;
 class IOSSurface;

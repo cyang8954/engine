@@ -235,7 +235,7 @@ UIView* FlutterPlatformViewsController::ReconstructClipViewsChain(int number_of_
   }
   // If there were not enough existing clip views, add more.
   while (clipIndex < number_of_clips) {
-    ChildClippingView* clippingView = [ChildClippingView new];
+    ChildClippingView* clippingView = [[ChildClippingView alloc] initWithFlutterView:flutter_view_.get()];
     [clippingView addSubview:head];
     head = clippingView;
     clipIndex++;
@@ -254,7 +254,8 @@ void FlutterPlatformViewsController::ApplyMutators(const MutatorsStack& mutators
   FML_DCHECK(CATransform3DEqualToTransform(embedded_view.layer.transform, CATransform3DIdentity));
   UIView* head = embedded_view;
   head.clipsToBounds = YES;
-  ResetAnchor(head.layer);
+  head.frame = CGRectMake(0, 0, head.frame.size.width, head.frame.size.height);
+  ResetAnchor(head);
 
   std::vector<std::shared_ptr<Mutator>>::const_reverse_iterator iter = mutators_stack.Bottom();
   while (iter != mutators_stack.Top()) {
@@ -269,12 +270,14 @@ void FlutterPlatformViewsController::ApplyMutators(const MutatorsStack& mutators
       case clip_path: {
         ChildClippingView* clipView = (ChildClippingView*)head.superview;
         clipView.layer.transform = CATransform3DIdentity;
+        head.clipsToBounds = YES;
+        clipView.frame = head.frame;
+        head.frame = CGRectMake(0, 0, head.frame.size.width, head.frame.size.height);
+        ResetAnchor(clipView);
         [clipView setClip:(*iter)->GetType()
                      rect:(*iter)->GetRect()
                     rrect:(*iter)->GetRRect()
                      path:(*iter)->GetPath()];
-        head.clipsToBounds = YES;
-        ResetAnchor(clipView.layer);
         head = clipView;
         break;
       }
@@ -316,6 +319,17 @@ void FlutterPlatformViewsController::CompositeWithParams(int view_id,
     root_views_[view_id] = fml::scoped_nsobject<UIView>([newPlatformViewRoot retain]);
   }
   ApplyMutators(params.mutatorsStack, touchInterceptor);
+
+
+//  CGRect embedded_view_final_rect = [touchInterceptor convertRect:touchInterceptor.bounds toView:flutter_view_.get()];
+//  NSLog(@"final rect %@", @(embedded_view_final_rect));
+//
+//  UIView *a11yView = [[UIView alloc] initWithFrame:embedded_view_final_rect];
+//  [a11yView addSubview:root_views_[view_id].get()];
+//  CGRect clipping_view_final_rect =  [touchInterceptor convertRect:root_views_[view_id].get().bounds toView:a11yView];
+//  NSLog(@"final clipping rect %@", @(clipping_view_final_rect));
+//  root_views_[view_id].get().frame = clipping_view_final_rect;
+//  root_views_[view_id] = fml::scoped_nsobject<UIView>([a11yView retain]);
 }
 
 SkCanvas* FlutterPlatformViewsController::CompositeEmbeddedView(int view_id) {
