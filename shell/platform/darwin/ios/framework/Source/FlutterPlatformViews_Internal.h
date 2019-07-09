@@ -41,6 +41,9 @@
           rrect:(const SkRRect&)rrect
            path:(const SkPath&)path;
 
+- (void)applyTransformToPath:(CATransform3D)transform;
+- (void)clip;
+
 @end
 
 namespace flutter {

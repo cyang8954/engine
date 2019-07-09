@@ -263,25 +263,20 @@ void FlutterPlatformViewsController::ApplyMutators(const MutatorsStack& mutators
       case transform: {
         CATransform3D transform = GetCATransform3DFromSkMatrix((*iter)->GetMatrix());
         head.layer.transform = CATransform3DConcat(head.layer.transform, transform);
+        ChildClippingView* clipView = (ChildClippingView*)head.superview;
+        [clipView applyTransformToPath:transform];
         break;
       }
       case clip_rect:
       case clip_rrect:
       case clip_path: {
         ChildClippingView* clipView = (ChildClippingView*)head.superview;
-        clipView.layer.transform = CATransform3DIdentity;
-        head.clipsToBounds = YES;
-        clipView.frame = head.frame;
-        NSLog(@"head frame before set %@", @(head.frame));
-        head.frame = CGRectMake(0, 0, head.frame.size.width, head.frame.size.height);
-        NSLog(@"head frame %@", @(head.frame));
         ResetAnchor(clipView);
         NSLog(@"head frame after reset %@",@(head.frame));
         [clipView setClip:(*iter)->GetType()
                      rect:(*iter)->GetRect()
                     rrect:(*iter)->GetRRect()
                      path:(*iter)->GetPath()];
-        head = clipView;
         break;
       }
       case opacity:
@@ -298,8 +293,13 @@ void FlutterPlatformViewsController::ApplyMutators(const MutatorsStack& mutators
   // 500 points in UIKit. And until this point, we did all the calculation based on the flow
   // resolution. So we need to scale down to match UIKit's logical resolution.
   CGFloat screenScale = [UIScreen mainScreen].scale;
+  NSLog(@"screen scale %@", @(screenScale));
+  CATransform3D scaleBackTransform =  CATransform3DMakeScale(1 / screenScale, 1 / screenScale, 1);
   head.layer.transform = CATransform3DConcat(
-      head.layer.transform, CATransform3DMakeScale(1 / screenScale, 1 / screenScale, 1));
+                                             head.layer.transform, scaleBackTransform);
+  ChildClippingView* clipView = (ChildClippingView*)head.superview;
+  [clipView applyTransformToPath:scaleBackTransform];
+  [clipView clip];
 }
 
 void FlutterPlatformViewsController::CompositeWithParams(int view_id,
@@ -310,7 +310,7 @@ void FlutterPlatformViewsController::CompositeWithParams(int view_id,
   touchInterceptor.frame = frame;
   touchInterceptor.alpha = 1;
 
-  int currentClippingCount = CountClips(params.mutatorsStack);
+  int currentClippingCount = 1;
   int previousClippingCount = clip_count_[view_id];
   if (currentClippingCount != previousClippingCount) {
     clip_count_[view_id] = currentClippingCount;

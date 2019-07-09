@@ -68,6 +68,7 @@ void ResetAnchor(UIView *view) {
 @interface ChildClippingView()
 
 @property(assign, nonatomic) UIView *flutterView;;
+@property(assign, nonatomic) CGMutablePathRef totalPath;
 
 @end
 
@@ -76,6 +77,7 @@ void ResetAnchor(UIView *view) {
 - (void)dealloc {
   [super dealloc];
   self.flutterView = nil;
+  CGPathRelease(self.totalPath);
 }
 
 - (instancetype)initWithFlutterView:(UIView *)flutterView
@@ -83,6 +85,8 @@ void ResetAnchor(UIView *view) {
   self = [super init];
   if (self) {
     self.flutterView = flutterView;
+    self.totalPath = CGPathCreateMutable();
+    self.frame = CGRectMake(0, 0, 10, 10);
   }
   return self;
 }
@@ -247,13 +251,27 @@ void ResetAnchor(UIView *view) {
   // the CAShaperLayer will be drawn antialiased. Need to figure out a way to do the hard edge
   // clipping on iOS.
   if (pathRef) {
-    CAShapeLayer* clip = [[CAShapeLayer alloc] init];
-    CGAffineTransform transform = CGAffineTransformMakeTranslation(-self.frame.origin.x, -self.frame.origin.y);
-    pathRef = CGPathCreateCopyByTransformingPath(pathRef, &transform);
-    clip.path = pathRef;
-    self.layer.mask = clip;
+    CGPathAddPath(self.totalPath, nil, pathRef);
     CGPathRelease(pathRef);
   }
+}
+
+- (void)applyTransformToPath:(CATransform3D)transform {
+  CGAffineTransform affineTransform = CATransform3DGetAffineTransform(transform);
+  self.totalPath = CGPathCreateMutableCopyByTransformingPath(self.totalPath, &affineTransform);
+  NSLog(@"total path %@", self.totalPath);
+}
+
+- (void)clip {
+  CAShapeLayer* clip = [[CAShapeLayer alloc] init];
+  clip.fillRule = kCAFillRuleEvenOdd;
+  CGAffineTransform transform = CGAffineTransformMakeTranslation(-self.frame.origin.x, -self.frame.origin.y);
+  CGPathRef finalClipPath = CGPathCreateCopyByTransformingPath(self.totalPath, &transform);
+  NSLog(@"finalClipPath path %@", finalClipPath);
+  clip.path = finalClipPath;
+  self.layer.mask = clip;
+  CGPathRelease(finalClipPath);
+  self.totalPath = CGPathCreateMutable();
 }
 
 // The ChildClippingView is as big as the FlutterView, we only want touches to be hit tested and
