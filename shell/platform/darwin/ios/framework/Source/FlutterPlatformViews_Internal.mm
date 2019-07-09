@@ -92,25 +92,20 @@ void ResetAnchor(UIView *view) {
                     clipSkRect.fBottom - clipSkRect.fTop);
 }
 
-- (void)clipRect:(const SkRect&)clipSkRect {
+- (CGPathRef)getClipRectPathRef:(const SkRect&)clipSkRect {
   CGRect clipRect = [ChildClippingView getCGRectFromSkRect:clipSkRect];
-  clipRect = [self.flutterView convertRect:clipRect toView:self];
   CGPathRef pathRef = CGPathCreateWithRect(clipRect, nil);
-  CAShapeLayer* clip = [[CAShapeLayer alloc] init];
-  clip.path = pathRef;
-  self.layer.mask = clip;
-  CGPathRelease(pathRef);
+  return pathRef;
 }
 
-- (void)clipRRect:(const SkRRect&)clipSkRRect {
+- (CGPathRef)getClipRRectPathRef:(const SkRRect&)clipSkRRect {
   CGPathRef pathRef = nullptr;
   switch (clipSkRRect.getType()) {
     case SkRRect::kEmpty_Type: {
       break;
     }
     case SkRRect::kRect_Type: {
-      [self clipRect:clipSkRRect.rect()];
-      return;
+      return [self getClipRectPathRef:clipSkRRect.rect()];
     }
     case SkRRect::kOval_Type:
     case SkRRect::kSimple_Type: {
@@ -162,30 +157,16 @@ void ResetAnchor(UIView *view) {
       break;
     }
   }
-  // TODO(cyanglaz): iOS does not seem to support hard edge on CAShapeLayer. It clearly stated that
-  // the CAShaperLayer will be drawn antialiased. Need to figure out a way to do the hard edge
-  // clipping on iOS.
-  CAShapeLayer* clip = [[CAShapeLayer alloc] init];
-
-  CGAffineTransform transform = CGAffineTransformMakeTranslation(-self.frame.origin.x, -self.frame.origin.y);
-  pathRef = CGPathCreateCopyByTransformingPath(pathRef, &transform);
-
-  clip.path = pathRef;
-  self.layer.mask = clip;
-  CGPathRelease(pathRef);
+  return pathRef;
 }
 
-- (void)clipPath:(const SkPath&)path {
+- (CGPathRef)getClipPathPathRef:(const SkPath&)path {
   CGMutablePathRef pathRef = CGPathCreateMutable();
   if (!path.isValid()) {
-    return;
+    return nil;
   }
   if (path.isEmpty()) {
-    CAShapeLayer* clip = [[CAShapeLayer alloc] init];
-    clip.path = pathRef;
-    self.layer.mask = clip;
-    CGPathRelease(pathRef);
-    return;
+    return pathRef;
   }
 
   // Loop through all verbs and translate them into CGPath
@@ -239,10 +220,7 @@ void ResetAnchor(UIView *view) {
     verb = iter.next(pts);
   }
 
-  CAShapeLayer* clip = [[CAShapeLayer alloc] init];
-  clip.path = pathRef;
-  self.layer.mask = clip;
-  CGPathRelease(pathRef);
+  return pathRef;
 }
 
 - (void)setClip:(flutter::MutatorType)type
@@ -251,18 +229,30 @@ void ResetAnchor(UIView *view) {
            path:(const SkPath&)path {
   FML_CHECK(type == flutter::clip_rect || type == flutter::clip_rrect ||
             type == flutter::clip_path);
+  CGPathRef pathRef = nil;
   switch (type) {
     case flutter::clip_rect:
-      [self clipRect:rect];
+      pathRef = [self getClipRectPathRef:rect];
       break;
     case flutter::clip_rrect:
-      [self clipRRect:rrect];
+      pathRef = [self getClipRRectPathRef:rrect];
       break;
     case flutter::clip_path:
-      [self clipPath:path];
+      pathRef = [self getClipPathPathRef:path];
       break;
     default:
       break;
+  }
+  // TODO(cyanglaz): iOS does not seem to support hard edge on CAShapeLayer. It clearly stated that
+  // the CAShaperLayer will be drawn antialiased. Need to figure out a way to do the hard edge
+  // clipping on iOS.
+  if (pathRef) {
+    CAShapeLayer* clip = [[CAShapeLayer alloc] init];
+    CGAffineTransform transform = CGAffineTransformMakeTranslation(-self.frame.origin.x, -self.frame.origin.y);
+    pathRef = CGPathCreateCopyByTransformingPath(pathRef, &transform);
+    clip.path = pathRef;
+    self.layer.mask = clip;
+    CGPathRelease(pathRef);
   }
 }
 

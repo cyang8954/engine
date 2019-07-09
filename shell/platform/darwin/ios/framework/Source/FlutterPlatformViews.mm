@@ -272,8 +272,11 @@ void FlutterPlatformViewsController::ApplyMutators(const MutatorsStack& mutators
         clipView.layer.transform = CATransform3DIdentity;
         head.clipsToBounds = YES;
         clipView.frame = head.frame;
+        NSLog(@"head frame before set %@", @(head.frame));
         head.frame = CGRectMake(0, 0, head.frame.size.width, head.frame.size.height);
+        NSLog(@"head frame %@", @(head.frame));
         ResetAnchor(clipView);
+        NSLog(@"head frame after reset %@",@(head.frame));
         [clipView setClip:(*iter)->GetType()
                      rect:(*iter)->GetRect()
                     rrect:(*iter)->GetRRect()
