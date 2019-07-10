@@ -6,6 +6,9 @@
 #import <UIKit/UIKit.h>
 #import "flutter/flow/embedded_views.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
+#import "third_party/skia/include/core/SkRRect.h"
+#import "third_party/skia/include/core/SkRect.h"
+#import "third_party/skia/include/core/SkMatrix.h"
 
 @interface FlutterPlatformViewsControllerUtilsTests : XCTestCase
 
@@ -30,9 +33,28 @@
   view.layer.transform = CATransform3DMakeScale(2, 2, 2);
   view.alpha = 0.5;
   flutter::FlutterPlatformViewsControllerUtils::PrepareEmbeddedViewForCompositionWithParams(view, params);
-  XCTAssert(view.alpha == 1);
+  XCTAssertEqual(view.alpha, 1);
   XCTAssert(CGRectEqualToRect(view.frame, CGRectMake(0, 0, 100, 100)));
   XCTAssert(CATransform3DEqualToTransform(view.layer.transform, CATransform3DIdentity));
+}
+
+- (void)testCountClip {
+  flutter::MutatorsStack stack;
+  stack.PushOpacity(240);
+  SkRect rect = SkRect::MakeEmpty();
+  stack.PushClipRect(rect);
+  SkRRect rrect = SkRRect::MakeEmpty();
+  stack.PushClipRRect(rrect);
+  SkMatrix matrix;
+  matrix.setIdentity();
+  stack.PushTransform(matrix);
+
+  int count = flutter::FlutterPlatformViewsControllerUtils::CountClips(stack);
+  XCTAssertEqual(count, 2);
+
+  flutter::MutatorsStack stack2;
+  int count2 = flutter::FlutterPlatformViewsControllerUtils::CountClips(stack);
+  XCTAssertEqual(count2, 0);
 }
 
 @end
