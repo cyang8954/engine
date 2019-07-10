@@ -192,6 +192,13 @@ class FlutterPlatformViewsController {
   //
   // After each clip operation, we update the head to the super view of the current head.
   void ApplyMutators(const MutatorsStack& mutators_stack, UIView* embedded_view);
+
+  // Prepare the embdded view before composition.
+  // This method will:
+  //   * update the `embedded_view`'s frame based on the `params`.
+  //   * reset the alpha to 1.
+  //   * reset the transform to identity.
+  void PrepareEmbeddedViewForCompositionWithParams(UIView *embeded_view, const EmbeddedViewParams& params);
   void CompositeWithParams(int view_id, const EmbeddedViewParams& params);
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterPlatformViewsController);

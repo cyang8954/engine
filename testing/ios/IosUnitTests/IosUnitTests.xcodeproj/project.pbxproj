@@ -17,6 +17,7 @@
 		0D6AB6EB22BB40E700EEE540 /* FlutterEngineTest.mm in Sources */ = {isa = PBXBuildFile; fileRef = 0D6AB6E722BB40CF00EEE540 /* FlutterEngineTest.mm */; };
 		0D6AB72C22BC339F00EEE540 /* libOCMock.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0D6AB72522BC336100EEE540 /* libOCMock.a */; };
 		0D6AB73F22BD8F0200EEE540 /* FlutterEngineConfig.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 0D6AB73E22BD8F0200EEE540 /* FlutterEngineConfig.xcconfig */; };
+		68B4C1EE22D655EB00F230C8 /* FlutterPlatformViewsTest.mm in Sources */ = {isa = PBXBuildFile; fileRef = 68B4C1ED22D655EB00F230C8 /* FlutterPlatformViewsTest.mm */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -88,6 +89,7 @@
 		0D6AB6E722BB40CF00EEE540 /* FlutterEngineTest.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = FlutterEngineTest.mm; sourceTree = "<group>"; };
 		0D6AB71722BC336100EEE540 /* OCMock.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = OCMock.xcodeproj; path = ../../../../../third_party/ocmock/Source/OCMock.xcodeproj; sourceTree = "<group>"; };
 		0D6AB73E22BD8F0200EEE540 /* FlutterEngineConfig.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = FlutterEngineConfig.xcconfig; sourceTree = "<group>"; };
+		68B4C1ED22D655EB00F230C8 /* FlutterPlatformViewsTest.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; path = FlutterPlatformViewsTest.mm; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -160,6 +162,7 @@
 			children = (
 				0D52D3B622C566D50011DEBD /* FlutterBinaryMessengerRelayTest.mm */,
 				0D6AB6E722BB40CF00EEE540 /* FlutterEngineTest.mm */,
+				68B4C1ED22D655EB00F230C8 /* FlutterPlatformViewsTest.mm */,
 			);
 			name = Source;
 			path = ../../../../shell/platform/darwin/ios/framework/Source;
@@ -370,6 +373,7 @@
 			files = (
 				0D6AB6EB22BB40E700EEE540 /* FlutterEngineTest.mm in Sources */,
 				0D52D3BD22C566D50011DEBD /* FlutterBinaryMessengerRelayTest.mm in Sources */,
+				68B4C1EE22D655EB00F230C8 /* FlutterPlatformViewsTest.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
