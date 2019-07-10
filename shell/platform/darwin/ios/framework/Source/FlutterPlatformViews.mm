@@ -296,17 +296,10 @@ void FlutterPlatformViewsController::ApplyMutators(const MutatorsStack& mutators
       head.layer.transform, CATransform3DMakeScale(1 / screenScale, 1 / screenScale, 1));
 }
 
-void FlutterPlatformViewsController::PrepareEmbeddedViewForCompositionWithParams(UIView *embeded_view, const EmbeddedViewParams& params) {
-  CGRect frame = CGRectMake(0, 0, params.sizePoints.width(), params.sizePoints.height());
-  touchInterceptor.layer.transform = CATransform3DIdentity;
-  touchInterceptor.frame = frame;
-  touchInterceptor.alpha = 1;
-}
-
 void FlutterPlatformViewsController::CompositeWithParams(int view_id,
                                                          const EmbeddedViewParams& params) {
   UIView* touchInterceptor = touch_interceptors_[view_id].get();
-  PrepareEmbeddedViewForCompositionWithParams(touchInterceptor, params);
+  FlutterPlatformViewsControllerUtils::PrepareEmbeddedViewForCompositionWithParams(touchInterceptor, params);
 
   int currentClippingCount = CountClips(params.mutatorsStack);
   int previousClippingCount = clip_count_[view_id];

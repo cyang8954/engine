@@ -18,6 +18,9 @@
 		0D6AB72C22BC339F00EEE540 /* libOCMock.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0D6AB72522BC336100EEE540 /* libOCMock.a */; };
 		0D6AB73F22BD8F0200EEE540 /* FlutterEngineConfig.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 0D6AB73E22BD8F0200EEE540 /* FlutterEngineConfig.xcconfig */; };
 		68B4C1EE22D655EB00F230C8 /* FlutterPlatformViewsTest.mm in Sources */ = {isa = PBXBuildFile; fileRef = 68B4C1ED22D655EB00F230C8 /* FlutterPlatformViewsTest.mm */; };
+		68B4C1FB22D665F600F230C8 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 68B4C1FA22D665F600F230C8 /* UIKit.framework */; };
+		68B4C1FE22D666F500F230C8 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 68B4C1FC22D6661A00F230C8 /* CoreGraphics.framework */; };
+		68B4C20022D6678600F230C8 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 68B4C1FF22D6678600F230C8 /* QuartzCore.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -89,7 +92,10 @@
 		0D6AB6E722BB40CF00EEE540 /* FlutterEngineTest.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = FlutterEngineTest.mm; sourceTree = "<group>"; };
 		0D6AB71722BC336100EEE540 /* OCMock.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = OCMock.xcodeproj; path = ../../../../../third_party/ocmock/Source/OCMock.xcodeproj; sourceTree = "<group>"; };
 		0D6AB73E22BD8F0200EEE540 /* FlutterEngineConfig.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = FlutterEngineConfig.xcconfig; sourceTree = "<group>"; };
-		68B4C1ED22D655EB00F230C8 /* FlutterPlatformViewsTest.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; path = FlutterPlatformViewsTest.mm; sourceTree = "<group>"; };
+		68B4C1ED22D655EB00F230C8 /* FlutterPlatformViewsTest.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; path = FlutterPlatformViewsTest.mm; sourceTree = "<group>"; };
+		68B4C1FA22D665F600F230C8 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		68B4C1FC22D6661A00F230C8 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		68B4C1FF22D6678600F230C8 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -104,6 +110,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				68B4C20022D6678600F230C8 /* QuartzCore.framework in Frameworks */,
+				68B4C1FE22D666F500F230C8 /* CoreGraphics.framework in Frameworks */,
+				68B4C1FB22D665F600F230C8 /* UIKit.framework in Frameworks */,
 				0D6AB72C22BC339F00EEE540 /* libOCMock.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -171,6 +180,9 @@
 		0D6AB6FC22BC1BC300EEE540 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				68B4C1FF22D6678600F230C8 /* QuartzCore.framework */,
+				68B4C1FC22D6661A00F230C8 /* CoreGraphics.framework */,
+				68B4C1FA22D665F600F230C8 /* UIKit.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";

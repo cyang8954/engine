@@ -1,42 +1,38 @@
-//
-//  FlutterPlatformViewsTest.m
-//  IosUnitTestsTests
-//
-//  Created by Chris Yang on 7/10/19.
-//  Copyright © 2019 Aaron Clarke. All rights reserved.
-//
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 #import <XCTest/XCTest.h>
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
+#import <UIKit/UIKit.h>
+#import "flutter/flow/embedded_views.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
 
-@interface FlutterPlatformViewsControllerTests : XCTestCase
+@interface FlutterPlatformViewsControllerUtilsTests : XCTestCase
 
 @end
 
-@implementation FlutterPlatformViewsControllerTests {
-  std::unique_ptr<flutter::FlutterPlatformViewsController> _platformViewsController;
+@implementation FlutterPlatformViewsControllerUtilsTests {
 }
 
 - (void)setUp {
     // Put setup code here. This method is called before the invocation of each test method in the class.
-  _platformViewsController.reset(new flutter::FlutterPlatformViewsController());
 }
 
 - (void)tearDown {
     // Put teardown code here. This method is called after the invocation of each test method in the class.
-  _platformViewsController.release();
 }
 
 - (void)testPrepareEmbeddedViewForCompositionWithParams{
-  _pl
-}
 
-- (void)testPerformanceExample {
-    // This is an example of a performance test case.
-    [self measureBlock:^{
-        // Put the code you want to measure the time of here.
-    }];
+  flutter::EmbeddedViewParams params;
+  params.sizePoints = SkSize::Make(100, 100);
+  UIView *view = [[[UIView alloc] initWithFrame:CGRectMake(10, 10, 50, 50)] autorelease];
+  view.layer.transform = CATransform3DMakeScale(2, 2, 2);
+  view.alpha = 0.5;
+  flutter::FlutterPlatformViewsControllerUtils::PrepareEmbeddedViewForCompositionWithParams(view, params);
+  XCTAssert(view.alpha == 1);
+  XCTAssert(CGRectEqualToRect(view.frame, CGRectMake(0, 0, 100, 100)));
+  XCTAssert(CATransform3DEqualToTransform(view.layer.transform, CATransform3DIdentity));
 }
 
 @end

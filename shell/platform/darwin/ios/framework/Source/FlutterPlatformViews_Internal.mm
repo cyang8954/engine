@@ -44,6 +44,13 @@ void ResetAnchor(CALayer* layer) {
   layer.position = CGPointZero;
 }
 
+void FlutterPlatformViewsControllerUtils::PrepareEmbeddedViewForCompositionWithParams(UIView *embeded_view, const EmbeddedViewParams& params) {
+  CGRect frame = CGRectMake(0, 0, params.sizePoints.width(), params.sizePoints.height());
+  embeded_view.layer.transform = CATransform3DIdentity;
+  embeded_view.frame = frame;
+  embeded_view.alpha = 1;
+}
+
 }  // namespace flutter
 
 @implementation ChildClippingView
