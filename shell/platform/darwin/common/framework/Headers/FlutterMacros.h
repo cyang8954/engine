@@ -15,6 +15,17 @@
 
 #endif  // defined(FLUTTER_SDK)
 
+#if defined(FLUTTER_FRAMEWORK) && \
+    FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
+
+#define FLUTTER_DEBUG_EXPORT FLUTTER_EXPORT
+
+#else
+
+#define FLUTTER_DEBUG_EXPORT
+
+#endif
+
 #ifndef NS_ASSUME_NONNULL_BEGIN
 #define NS_ASSUME_NONNULL_BEGIN _Pragma("clang assume_nonnull begin")
 #define NS_ASSUME_NONNULL_END _Pragma("clang assume_nonnull end")
