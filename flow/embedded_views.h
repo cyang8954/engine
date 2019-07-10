@@ -8,7 +8,6 @@
 #include <vector>
 
 #include "flutter/fml/memory/ref_counted.h"
-#include "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPath.h"
 #include "third_party/skia/include/core/SkPoint.h"
@@ -125,15 +124,10 @@ class MutatorsStack {
  public:
   MutatorsStack() = default;
 
-  FLUTTER_DEBUG_EXPORT
   void PushClipRect(const SkRect& rect);
-  FLUTTER_DEBUG_EXPORT
   void PushClipRRect(const SkRRect& rrect);
-  FLUTTER_DEBUG_EXPORT
   void PushClipPath(const SkPath& path);
-  FLUTTER_DEBUG_EXPORT
   void PushTransform(const SkMatrix& matrix);
-  FLUTTER_DEBUG_EXPORT
   void PushOpacity(const int& alpha);
 
   // Removes the `Mutator` on the top of the stack
