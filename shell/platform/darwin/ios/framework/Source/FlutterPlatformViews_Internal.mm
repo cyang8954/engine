@@ -44,6 +44,18 @@ void ResetAnchor(CALayer* layer) {
   layer.position = CGPointZero;
 }
 
+int FlutterPlatformViewsControllerUtils::CountClips(const MutatorsStack &mutators_stack) {
+  std::vector<std::shared_ptr<Mutator>>::const_reverse_iterator iter = mutators_stack.Bottom();
+  int clipCount = 0;
+  while (iter != mutators_stack.Top()) {
+    if ((*iter)->IsClipType()) {
+      clipCount++;
+    }
+    ++iter;
+  }
+  return clipCount;
+}
+
 }  // namespace flutter
 
 @implementation ChildClippingView

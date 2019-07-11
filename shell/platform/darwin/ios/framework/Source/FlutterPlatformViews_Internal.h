@@ -160,9 +160,6 @@ class FlutterPlatformViewsController {
                                   std::shared_ptr<IOSGLContext> gl_context,
                                   GrContext* gr_context);
 
-  // Traverse the `mutators_stack` and return the number of clip operations.
-  int CountClips(const MutatorsStack& mutators_stack);
-
   // Make sure that platform_view has exactly clip_count ChildClippingView ancestors.
   //
   // Existing ChildClippingViews are re-used. If there are currently more ChildClippingView
@@ -196,6 +193,13 @@ class FlutterPlatformViewsController {
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterPlatformViewsController);
 };
+
+class FlutterPlatformViewsControllerUtils {
+
+ public:
+  // Traverse the `mutators_stack` and return the number of clip operations.
+  static int CountClips(const MutatorsStack& mutators_stack);
+}
 
 }  // namespace flutter
 
