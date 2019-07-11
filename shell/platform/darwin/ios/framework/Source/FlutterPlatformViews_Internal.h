@@ -199,7 +199,7 @@ class FlutterPlatformViewsControllerUtils {
  public:
   // Traverse the `mutators_stack` and return the number of clip operations.
   static int CountClips(const MutatorsStack& mutators_stack);
-}
+};
 
 }  // namespace flutter
 

@@ -6,32 +6,59 @@
 #include "gtest/gtest.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
 
-void checkEncodeDecode(id value, NSData* expectedEncoding) {
-  FlutterStandardMessageCodec* codec = [FlutterStandardMessageCodec sharedInstance];
-  NSData* encoded = [codec encode:value];
-  if (expectedEncoding == nil)
-    ASSERT_TRUE(encoded == nil);
-  else
-    ASSERT_TRUE([encoded isEqual:expectedEncoding]);
-  id decoded = [codec decode:encoded];
-  if (value == nil || value == [NSNull null])
-    ASSERT_TRUE(decoded == nil);
-  else
-    ASSERT_TRUE([value isEqual:decoded]);
-}
-
-void checkEncodeDecode(id value) {
-  FlutterStandardMessageCodec* codec = [FlutterStandardMessageCodec sharedInstance];
-  NSData* encoded = [codec encode:value];
-  id decoded = [codec decode:encoded];
-  if (value == nil || value == [NSNull null])
-    ASSERT_TRUE(decoded == nil);
-  else
-    ASSERT_TRUE([value isEqual:decoded]);
-}
+namespace flutter {
 
 TEST(FlutterPlatformViewsControllerUtils, CountClips) {
-  
+    MutatorsStack stack;
+    stack.PushOpacity(240);
+    SkPath path;
+    stack.PushClipPath(path);
+    SkRect rect = SkRect::MakeEmpty();
+    stack.PushClipRect(rect);
+    SkRRect rrect = SkRRect::MakeEmpty();
+    stack.PushClipRRect(rrect);
+    SkMatrix matrix;
+    matrix.setIdentity();
+    stack.PushTransform(matrix);
+
+    int count = flutter::FlutterPlatformViewsControllerUtils::CountClips(stack);
+    ASSERT_TRUE(count, 2);
+
+    flutter::MutatorsStack stack2;
+    int count2 = flutter::FlutterPlatformViewsControllerUtils::CountClips(stack);
+    ASSERT_TRUE(count2, 0);
+}
 }
 
 
+//- (void)testPrepareEmbeddedViewForCompositionWithParams{
+//
+//  flutter::EmbeddedViewParams params;
+//  params.sizePoints = SkSize::Make(100, 100);
+//  UIView *view = [[[UIView alloc] initWithFrame:CGRectMake(10, 10, 50, 50)] autorelease];
+//  view.layer.transform = CATransform3DMakeScale(2, 2, 2);
+//  view.alpha = 0.5;
+//  flutter::FlutterPlatformViewsControllerUtils::PrepareEmbeddedViewForCompositionWithParams(view, params);
+//  XCTAssertEqual(view.alpha, 1);
+//  XCTAssert(CGRectEqualToRect(view.frame, CGRectMake(0, 0, 100, 100)));
+//  XCTAssert(CATransform3DEqualToTransform(view.layer.transform, CATransform3DIdentity));
+//}
+//
+//- (void)testCountClip {
+//  flutter::MutatorsStack stack;
+//  stack.PushOpacity(240);
+//  SkRect rect = SkRect::MakeEmpty();
+//  stack.PushClipRect(rect);
+//  SkRRect rrect = SkRRect::MakeEmpty();
+//  stack.PushClipRRect(rrect);
+//  SkMatrix matrix;
+//  matrix.setIdentity();
+//  stack.PushTransform(matrix);
+//
+//  int count = flutter::FlutterPlatformViewsControllerUtils::CountClips(stack);
+//  XCTAssertEqual(count, 2);
+//
+//  flutter::MutatorsStack stack2;
+//  int count2 = flutter::FlutterPlatformViewsControllerUtils::CountClips(stack);
+//  XCTAssertEqual(count2, 0);
+//}

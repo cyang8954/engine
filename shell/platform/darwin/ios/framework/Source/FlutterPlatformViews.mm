@@ -292,7 +292,7 @@ void FlutterPlatformViewsController::CompositeWithParams(int view_id,
   touchInterceptor.frame = frame;
   touchInterceptor.alpha = 1;
 
-  int currentClippingCount = CountClips(params.mutatorsStack);
+  int currentClippingCount = FlutterPlatformViewsControllerUtils::CountClips(params.mutatorsStack);
   int previousClippingCount = clip_count_[view_id];
   if (currentClippingCount != previousClippingCount) {
     clip_count_[view_id] = currentClippingCount;
