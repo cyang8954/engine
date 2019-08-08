@@ -481,6 +481,26 @@ void FlutterPlatformViewsController::EnsureGLOverlayInitialized(
   overlays_gr_context_ = gr_context;
 }
 
+void* FlutterPlatformViewsController::TakeScreenShot(size_t* size) {
+  CGRect rect = flutter_view_.get().bounds;
+  UIGraphicsBeginImageContext(rect.size);
+  CGContextRef ctx = UIGraphicsGetCurrentContext();
+
+  [[UIColor blackColor] set];
+  CGContextFillRect(ctx, rect);
+
+  //UIWindow *window = [UIApplication sharedApplication].keyWindow;
+  [flutter_view_.get().layer renderInContext:ctx];
+  UIImage *screenshot = UIGraphicsGetImageFromCurrentImageContext();
+
+  UIGraphicsEndImageContext();
+  CGImageRef imageRef = CGImageRetain(screenshot.CGImage);
+  NSData *data = UIImagePNGRepresentation([UIImage imageWithCGImage:imageRef]);
+  *size = static_cast<size_t>(CFDataGetLength((CFDataRef)data));
+  CGImageRelease(imageRef);
+  return (void *)CFDataGetBytePtr((CFDataRef)data);
+}
+
 }  // namespace flutter
 
 // This recognizers delays touch events from being dispatched to the responder chain until it failed

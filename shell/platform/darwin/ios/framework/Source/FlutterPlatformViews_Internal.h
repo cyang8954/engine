@@ -42,6 +42,7 @@
 @end
 
 namespace flutter {
+
 // Converts a SkMatrix to CATransform3D.
 // Certain fields are ignored in CATransform3D since SkMatrix is 3x3 and CATransform3D is 4x4.
 CATransform3D GetCATransform3DFromSkMatrix(const SkMatrix& matrix);
@@ -105,6 +106,8 @@ class FlutterPlatformViewsController {
                    std::shared_ptr<IOSGLContext> gl_context);
 
   void OnMethodCall(FlutterMethodCall* call, FlutterResult& result);
+
+  void* TakeScreenShot(size_t* size);
 
  private:
   fml::scoped_nsobject<FlutterMethodChannel> channel_;

@@ -135,25 +135,12 @@ bool IOSSurfaceGL::SubmitFrame(GrContext* context) {
   return submitted;
 }
 
-const void* IOSSurfaceGL::GetScreenShot() {
-  NSLog(@"GetScreenShot GL");
-
-    CGRect screenRect = [[UIScreen mainScreen] bounds];
-    UIGraphicsBeginImageContext(screenRect.size);
-    CGContextRef ctx = UIGraphicsGetCurrentContext();
-    [[UIColor blackColor] set];
-    CGContextFillRect(ctx, screenRect);
-
-    // grab reference to our window
-    UIWindow *window = [UIApplication sharedApplication].keyWindow;
-
-    // transfer content into our context
-    [window.layer renderInContext:ctx];
-    UIImage *screenshot = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
-    CGImageRef imageRef = CGImageRetain(screenshot.CGImage);
-    NSData *imageData = (NSData *)CGDataProviderCopyData(CGImageGetDataProvider(imageRef));
-    return [imageData bytes];
-}
+void* IOSSurfaceGL::TakeScreenShot(size_t* size) {
+    FlutterPlatformViewsController* platform_views_controller = GetPlatformViewsController();
+    if (platform_views_controller == nullptr) {
+      return 0;
+    }
+    return platform_views_controller ->  TakeScreenShot(size);
+  }
 
 }  // namespace flutter

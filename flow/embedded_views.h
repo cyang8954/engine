@@ -212,7 +212,7 @@ class ExternalViewEmbedder {
 
   virtual bool SubmitFrame(GrContext* context);
 
-  virtual const void* GetScreenShot() = 0;
+  virtual void* TakeScreenShot(size_t* size) = 0;
 
   virtual ~ExternalViewEmbedder() = default;
 

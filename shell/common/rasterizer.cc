@@ -254,13 +254,11 @@ sk_sp<SkData> Rasterizer::ScreenshotLayerTreeAsImage(
     flutter::CompositorContext& compositor_context,
     GrContext* surface_context,
     bool compressed) {
-  FML_LOG(ERROR) << "as image";
   // Attempt to create a snapshot surface depending on whether we have access to
   // a valid GPU rendering context.
   auto snapshot_surface =
       CreateSnapshotSurface(surface_context, tree->frame_size());
   if (snapshot_surface == nullptr) {
-    FML_LOG(ERROR) << "Screenshot: unable to create snapshot surface";
     return nullptr;
   }
 
@@ -277,10 +275,8 @@ sk_sp<SkData> Rasterizer::ScreenshotLayerTreeAsImage(
   canvas->clear(SK_ColorTRANSPARENT);
   frame->Raster(*tree, true);
   canvas->flush();
-  FML_LOG(ERROR) << "start getting buffer";
-  const void* buffer = surface_->GetExternalViewEmbedder()->GetScreenShot();
-    FML_LOG(ERROR) << "size " << sizeof(buffer);
-  return SkData::MakeWithCopy(buffer, 1490944);
+  size_t length = 0;
+  return SkData::MakeWithCopy(surface_->GetExternalViewEmbedder()->TakeScreenShot(&length), length);
 
 //  // Prepare an image from the surface, this image may potentially be on th GPU.
 //  auto potentially_gpu_snapshot = snapshot_surface->makeImageSnapshot();
