@@ -73,6 +73,8 @@ class IOSSurfaceGL final : public IOSSurface,
   // |flutter::ExternalViewEmbedder|
   bool SubmitFrame(GrContext* context) override;
 
+  const void* GetScreenShot() override;
+
  private:
   std::shared_ptr<IOSGLContext> context_;
   std::unique_ptr<IOSGLRenderTarget> render_target_;

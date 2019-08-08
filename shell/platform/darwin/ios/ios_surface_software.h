@@ -66,6 +66,8 @@ class IOSSurfaceSoftware final : public IOSSurface,
 
   // |flutter::ExternalViewEmbedder|
   bool SubmitFrame(GrContext* context) override;
+                                   
+  const void* GetScreenShot() override;
 
  private:
   fml::scoped_nsobject<CALayer> layer_;

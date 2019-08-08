@@ -212,6 +212,8 @@ class ExternalViewEmbedder {
 
   virtual bool SubmitFrame(GrContext* context);
 
+  virtual const void* GetScreenShot() = 0;
+
   virtual ~ExternalViewEmbedder() = default;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ExternalViewEmbedder);
