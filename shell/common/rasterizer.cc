@@ -206,6 +206,7 @@ static sk_sp<SkData> SerializeTypeface(SkTypeface* typeface, void* ctx) {
 static sk_sp<SkData> ScreenshotLayerTreeAsPicture(
     flutter::LayerTree* tree,
     flutter::CompositorContext& compositor_context) {
+  FML_LOG(ERROR) << "as picture";
   FML_DCHECK(tree != nullptr);
   SkPictureRecorder recorder;
   recorder.beginRecording(
@@ -226,6 +227,8 @@ static sk_sp<SkData> ScreenshotLayerTreeAsPicture(
   procs.fTypefaceProc = SerializeTypeface;
 
   return recorder.finishRecordingAsPicture()->serialize(&procs);
+//  const void* buffer = surface_->GetExternalViewEmbedder()->GetScreenShot();
+//  return SkData::MakeFromMalloc(buffer, sizeof(buffer));
 }
 
 static sk_sp<SkSurface> CreateSnapshotSurface(GrContext* surface_context,
@@ -246,11 +249,12 @@ static sk_sp<SkSurface> CreateSnapshotSurface(GrContext* surface_context,
   return SkSurface::MakeRaster(image_info);
 }
 
-static sk_sp<SkData> ScreenshotLayerTreeAsImage(
+sk_sp<SkData> Rasterizer::ScreenshotLayerTreeAsImage(
     flutter::LayerTree* tree,
     flutter::CompositorContext& compositor_context,
     GrContext* surface_context,
     bool compressed) {
+  FML_LOG(ERROR) << "as image";
   // Attempt to create a snapshot surface depending on whether we have access to
   // a valid GPU rendering context.
   auto snapshot_surface =
@@ -273,35 +277,39 @@ static sk_sp<SkData> ScreenshotLayerTreeAsImage(
   canvas->clear(SK_ColorTRANSPARENT);
   frame->Raster(*tree, true);
   canvas->flush();
+  FML_LOG(ERROR) << "start getting buffer";
+  const void* buffer = surface_->GetExternalViewEmbedder()->GetScreenShot();
+    FML_LOG(ERROR) << "size " << sizeof(buffer);
+  return SkData::MakeWithCopy(buffer, 1490944);
 
-  // Prepare an image from the surface, this image may potentially be on th GPU.
-  auto potentially_gpu_snapshot = snapshot_surface->makeImageSnapshot();
-  if (!potentially_gpu_snapshot) {
-    FML_LOG(ERROR) << "Screenshot: unable to make image screenshot";
-    return nullptr;
-  }
-
-  // Copy the GPU image snapshot into CPU memory.
-  auto cpu_snapshot = potentially_gpu_snapshot->makeRasterImage();
-  if (!cpu_snapshot) {
-    FML_LOG(ERROR) << "Screenshot: unable to make raster image";
-    return nullptr;
-  }
-
-  // If the caller want the pixels to be compressed, there is a Skia utility to
-  // compress to PNG. Use that.
-  if (compressed) {
-    return cpu_snapshot->encodeToData();
-  }
-
-  // Copy it into a bitmap and return the same.
-  SkPixmap pixmap;
-  if (!cpu_snapshot->peekPixels(&pixmap)) {
-    FML_LOG(ERROR) << "Screenshot: unable to obtain bitmap pixels";
-    return nullptr;
-  }
-
-  return SkData::MakeWithCopy(pixmap.addr32(), pixmap.computeByteSize());
+//  // Prepare an image from the surface, this image may potentially be on th GPU.
+//  auto potentially_gpu_snapshot = snapshot_surface->makeImageSnapshot();
+//  if (!potentially_gpu_snapshot) {
+//    FML_LOG(ERROR) << "Screenshot: unable to make image screenshot";
+//    return nullptr;
+//  }
+//
+//  // Copy the GPU image snapshot into CPU memory.
+//  auto cpu_snapshot = potentially_gpu_snapshot->makeRasterImage();
+//  if (!cpu_snapshot) {
+//    FML_LOG(ERROR) << "Screenshot: unable to make raster image";
+//    return nullptr;
+//  }
+//
+//  // If the caller want the pixels to be compressed, there is a Skia utility to
+//  // compress to PNG. Use that.
+//  if (compressed) {
+//    return cpu_snapshot->encodeToData();
+//  }
+//
+//  // Copy it into a bitmap and return the same.
+//  SkPixmap pixmap;
+//  if (!cpu_snapshot->peekPixels(&pixmap)) {
+//    FML_LOG(ERROR) << "Screenshot: unable to obtain bitmap pixels";
+//    return nullptr;
+//  }
+//
+//  return SkData::MakeWithCopy(pixmap.addr32(), pixmap.computeByteSize());
 }
 
 Rasterizer::Screenshot Rasterizer::ScreenshotLastLayerTree(
