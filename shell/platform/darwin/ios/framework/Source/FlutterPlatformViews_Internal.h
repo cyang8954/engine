@@ -72,6 +72,8 @@ class FlutterPlatformViewsController {
 
   ~FlutterPlatformViewsController();
 
+  UIView* GetFlutterView();
+
   void SetFlutterView(UIView* flutter_view);
 
   void SetFlutterViewController(UIViewController* flutter_view_controller);
@@ -106,8 +108,6 @@ class FlutterPlatformViewsController {
                    std::shared_ptr<IOSGLContext> gl_context);
 
   void OnMethodCall(FlutterMethodCall* call, FlutterResult& result);
-
-  void* TakeScreenShot(size_t* size);
 
  private:
   fml::scoped_nsobject<FlutterMethodChannel> channel_;

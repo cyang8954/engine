@@ -411,10 +411,10 @@ class Rasterizer final {
   RasterStatus DrawToSurface(flutter::LayerTree& layer_tree);
 
   sk_sp<SkData> ScreenshotLayerTreeAsImage(
-                                           flutter::LayerTree* tree,
-                                           flutter::CompositorContext& compositor_context,
-                                           GrContext* surface_context,
-                                           bool compressed);
+      flutter::LayerTree* tree,
+      flutter::CompositorContext& compositor_context,
+      GrContext* surface_context,
+      bool compressed);
 
   void FireNextFrameCallbackIfPresent();
 

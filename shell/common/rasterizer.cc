@@ -227,8 +227,8 @@ static sk_sp<SkData> ScreenshotLayerTreeAsPicture(
   procs.fTypefaceProc = SerializeTypeface;
 
   return recorder.finishRecordingAsPicture()->serialize(&procs);
-//  const void* buffer = surface_->GetExternalViewEmbedder()->GetScreenShot();
-//  return SkData::MakeFromMalloc(buffer, sizeof(buffer));
+  //  const void* buffer = surface_->GetExternalViewEmbedder()->GetScreenShot();
+  //  return SkData::MakeFromMalloc(buffer, sizeof(buffer));
 }
 
 static sk_sp<SkSurface> CreateSnapshotSurface(GrContext* surface_context,
@@ -275,37 +275,38 @@ sk_sp<SkData> Rasterizer::ScreenshotLayerTreeAsImage(
   canvas->clear(SK_ColorTRANSPARENT);
   frame->Raster(*tree, true);
   canvas->flush();
-  size_t length = 0;
-  return SkData::MakeWithCopy(surface_->GetExternalViewEmbedder()->TakeScreenShot(&length), length);
 
-//  // Prepare an image from the surface, this image may potentially be on th GPU.
-//  auto potentially_gpu_snapshot = snapshot_surface->makeImageSnapshot();
-//  if (!potentially_gpu_snapshot) {
-//    FML_LOG(ERROR) << "Screenshot: unable to make image screenshot";
-//    return nullptr;
-//  }
-//
-//  // Copy the GPU image snapshot into CPU memory.
-//  auto cpu_snapshot = potentially_gpu_snapshot->makeRasterImage();
-//  if (!cpu_snapshot) {
-//    FML_LOG(ERROR) << "Screenshot: unable to make raster image";
-//    return nullptr;
-//  }
-//
-//  // If the caller want the pixels to be compressed, there is a Skia utility to
-//  // compress to PNG. Use that.
-//  if (compressed) {
-//    return cpu_snapshot->encodeToData();
-//  }
-//
-//  // Copy it into a bitmap and return the same.
-//  SkPixmap pixmap;
-//  if (!cpu_snapshot->peekPixels(&pixmap)) {
-//    FML_LOG(ERROR) << "Screenshot: unable to obtain bitmap pixels";
-//    return nullptr;
-//  }
-//
-//  return SkData::MakeWithCopy(pixmap.addr32(), pixmap.computeByteSize());
+  const auto potentially_gpu_snapshot =
+      surface_->GetExternalViewEmbedder()->TakeScreenShot();
+
+  //  // Prepare an image from the surface, this image may potentially be on th
+  //  GPU. auto potentially_gpu_snapshot =
+  //  snapshot_surface->makeImageSnapshot(); if (!potentially_gpu_snapshot) {
+  //    FML_LOG(ERROR) << "Screenshot: unable to make image screenshot";
+  //    return nullptr;
+  //  }
+  //
+  // Copy the GPU image snapshot into CPU memory.
+  auto cpu_snapshot = potentially_gpu_snapshot->makeRasterImage();
+  if (!cpu_snapshot) {
+    FML_LOG(ERROR) << "Screenshot: unable to make raster image";
+    return nullptr;
+  }
+
+  // If the caller want the pixels to be compressed, there is a Skia utility to
+  // compress to PNG. Use that.
+  if (compressed) {
+    return cpu_snapshot->encodeToData();
+  }
+
+  // Copy it into a bitmap and return the same.
+  SkPixmap pixmap;
+  if (!cpu_snapshot->peekPixels(&pixmap)) {
+    FML_LOG(ERROR) << "Screenshot: unable to obtain bitmap pixels";
+    return nullptr;
+  }
+
+  return SkData::MakeWithCopy(pixmap.addr32(), pixmap.computeByteSize());
 }
 
 Rasterizer::Screenshot Rasterizer::ScreenshotLastLayerTree(

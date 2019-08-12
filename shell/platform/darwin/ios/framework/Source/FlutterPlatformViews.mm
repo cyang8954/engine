@@ -18,6 +18,10 @@
 
 namespace flutter {
 
+UIView* FlutterPlatformViewsController::GetFlutterView() {
+  return flutter_view_.get();
+}
+
 void FlutterPlatformViewsController::SetFlutterView(UIView* flutter_view) {
   flutter_view_.reset([flutter_view retain]);
 }
@@ -479,26 +483,6 @@ void FlutterPlatformViewsController::EnsureGLOverlayInitialized(
   overlays_[overlay_id] = std::make_unique<FlutterPlatformViewLayer>(
       fml::scoped_nsobject<UIView>(overlay_view), std::move(ios_surface), std::move(surface));
   overlays_gr_context_ = gr_context;
-}
-
-void* FlutterPlatformViewsController::TakeScreenShot(size_t* size) {
-  CGRect rect = flutter_view_.get().bounds;
-  UIGraphicsBeginImageContext(rect.size);
-  CGContextRef ctx = UIGraphicsGetCurrentContext();
-
-  [[UIColor blackColor] set];
-  CGContextFillRect(ctx, rect);
-
-  //UIWindow *window = [UIApplication sharedApplication].keyWindow;
-  [flutter_view_.get().layer renderInContext:ctx];
-  UIImage *screenshot = UIGraphicsGetImageFromCurrentImageContext();
-
-  UIGraphicsEndImageContext();
-  CGImageRef imageRef = CGImageRetain(screenshot.CGImage);
-  NSData *data = UIImagePNGRepresentation([UIImage imageWithCGImage:imageRef]);
-  *size = static_cast<size_t>(CFDataGetLength((CFDataRef)data));
-  CGImageRelease(imageRef);
-  return (void *)CFDataGetBytePtr((CFDataRef)data);
 }
 
 }  // namespace flutter

@@ -181,12 +181,10 @@ bool IOSSurfaceSoftware::SubmitFrame(GrContext* context) {
   return platform_views_controller->SubmitFrame(false, nullptr, nullptr);
 }
 
-void* IOSSurfaceSoftware::TakeScreenShot(size_t* size) {
+sk_sp<SkImage> IOSSurfaceSoftware::TakeScreenShot() {
   FlutterPlatformViewsController* platform_views_controller = GetPlatformViewsController();
-  if (platform_views_controller == nullptr) {
-    return 0;
-  }
-  return platform_views_controller ->  TakeScreenShot(size);
+  FML_CHECK(platform_views_controller != nullptr);
+  return ScreenShot(platform_views_controller->GetFlutterView());
 }
 
 }  // namespace flutter

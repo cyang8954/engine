@@ -8,6 +8,7 @@
 
 #include "flutter/shell/platform/darwin/ios/ios_surface_gl.h"
 #include "flutter/shell/platform/darwin/ios/ios_surface_software.h"
+#include "third_party/skia/include/core/SkImageInfo.h"
 
 namespace flutter {
 
@@ -25,5 +26,40 @@ IOSSurface::~IOSSurface() = default;
 
 FlutterPlatformViewsController* IOSSurface::GetPlatformViewsController() {
   return platform_views_controller_;
+}
+
+sk_sp<SkImage> IOSSurface::ScreenShot(UIView *view) {
+  CGRect rect = view.bounds;
+  UIGraphicsBeginImageContext(rect.size);
+  CGContextRef ctx = UIGraphicsGetCurrentContext();
+
+  [[UIColor blackColor] set];
+  CGContextFillRect(ctx, rect);
+
+  [view.layer renderInContext:ctx];
+  UIImage *screenshot = UIGraphicsGetImageFromCurrentImageContext();
+
+  UIGraphicsEndImageContext();
+  CGImageRef imageRef = CGImageRetain(screenshot.CGImage);
+  CFDataRef data = CGDataProviderCopyData(CGImageGetDataProvider(imageRef));
+
+  size_t rowBtyes = CGImageGetBytesPerRow(imageRef);
+
+  sk_sp<SkData> rasterData = SkData::MakeWithCopy(CFDataGetBytePtr(data), CFDataGetLength(data));
+  const auto image_info = SkImageInfo::Make(
+                                            CGImageGetWidth(imageRef),
+                                            CGImageGetHeight(imageRef),
+                                            kBGRA_8888_SkColorType,
+                                            kOpaque_SkAlphaType, SkColorSpace::MakeSRGB());
+
+  sk_sp<SkImage> skImage = SkImage::MakeRasterData(
+                                                    image_info,
+                                                    rasterData,
+                                                    rowBtyes);
+
+  CGImageRelease(imageRef);
+  CFRelease(data);
+
+  return skImage;
 }
 }  // namespace flutter

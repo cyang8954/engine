@@ -212,9 +212,9 @@ class ExternalViewEmbedder {
 
   virtual bool SubmitFrame(GrContext* context);
 
-  virtual void* TakeScreenShot(size_t* size) = 0;
-
   virtual ~ExternalViewEmbedder() = default;
+
+  virtual sk_sp<SkImage> TakeScreenShot() = 0;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ExternalViewEmbedder);
 
