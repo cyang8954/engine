@@ -10,6 +10,7 @@
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/shell/gpu/gpu_surface_software.h"
 #include "flutter/shell/platform/darwin/ios/ios_surface.h"
+#include "flutter/shell/platform/darwin/ios/ios_screenshot_provider.h"
 
 @class CALayer;
 
@@ -17,7 +18,8 @@ namespace flutter {
 
 class IOSSurfaceSoftware final : public IOSSurface,
                                  public GPUSurfaceSoftwareDelegate,
-                                 public flutter::ExternalViewEmbedder {
+                                 public flutter::ExternalViewEmbedder,
+                                 public flutter::IOSScreenShotProvider {
  public:
   IOSSurfaceSoftware(fml::scoped_nsobject<CALayer> layer,
                      FlutterPlatformViewsController* platform_views_controller);
@@ -45,6 +47,8 @@ class IOSSurfaceSoftware final : public IOSSurface,
   // |GPUSurfaceSoftwareDelegate|
   flutter::ExternalViewEmbedder* GetExternalViewEmbedder() override;
 
+  flutter::PlatformScreenShotProvider* GetScreenShotProvider() override;
+
   // |flutter::ExternalViewEmbedder|
   void CancelFrame() override;
 
@@ -67,7 +71,7 @@ class IOSSurfaceSoftware final : public IOSSurface,
   // |flutter::ExternalViewEmbedder|
   bool SubmitFrame(GrContext* context) override;
 
-  // |flutter::ExternalViewEmbedder|
+  // |flutter::PlatformScreenShotProvider|
   sk_sp<SkImage> TakeScreenShot() override;
 
  private:

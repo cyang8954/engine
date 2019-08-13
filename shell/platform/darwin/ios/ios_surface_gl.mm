@@ -82,6 +82,15 @@ flutter::ExternalViewEmbedder* IOSSurfaceGL::GetExternalViewEmbedder() {
   }
 }
 
+flutter::PlatformScreenShotProvider* IOSSurfaceGL::GetScreenShotProvider() {
+  if (IsIosEmbeddedViewsPreviewEnabled()) {
+    return this;
+  } else {
+    return nullptr;
+  }
+}
+
+
 void IOSSurfaceGL::CancelFrame() {
   FlutterPlatformViewsController* platform_views_controller = GetPlatformViewsController();
   FML_CHECK(platform_views_controller != nullptr);

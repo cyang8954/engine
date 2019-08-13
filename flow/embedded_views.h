@@ -218,7 +218,12 @@ class ExternalViewEmbedder {
 
   FML_DISALLOW_COPY_AND_ASSIGN(ExternalViewEmbedder);
 
-};  // ExternalViewEmbedder
+};
+
+class PlatformScreenShotProvider {
+ public:
+  virtual sk_sp<SkImage> TakeScreenShot() = 0;
+}; // ExternalViewEmbedder
 
 }  // namespace flutter
 

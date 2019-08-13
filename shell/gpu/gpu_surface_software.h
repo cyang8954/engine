@@ -20,6 +20,8 @@ class GPUSurfaceSoftwareDelegate {
   virtual bool PresentBackingStore(sk_sp<SkSurface> backing_store) = 0;
 
   virtual flutter::ExternalViewEmbedder* GetExternalViewEmbedder();
+
+  virtual flutter::PlatformScreenShotProvider* GetScreenShotProvider() = 0;
 };
 
 class GPUSurfaceSoftware : public Surface {
@@ -42,6 +44,9 @@ class GPUSurfaceSoftware : public Surface {
 
   // |Surface|
   flutter::ExternalViewEmbedder* GetExternalViewEmbedder() override;
+
+  // |Surface|
+  flutter::PlatformScreenShotProvider* GetScreenShotProvider() override;
 
  private:
   GPUSurfaceSoftwareDelegate* delegate_;

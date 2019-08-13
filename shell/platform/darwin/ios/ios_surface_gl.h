@@ -11,6 +11,7 @@
 #include "flutter/shell/platform/darwin/ios/ios_gl_context.h"
 #include "flutter/shell/platform/darwin/ios/ios_gl_render_target.h"
 #include "flutter/shell/platform/darwin/ios/ios_surface.h"
+#include "flutter/shell/platform/darwin/ios/ios_screenshot_provider.h"
 
 @class CAEAGLLayer;
 
@@ -18,7 +19,8 @@ namespace flutter {
 
 class IOSSurfaceGL final : public IOSSurface,
                            public GPUSurfaceGLDelegate,
-                           public flutter::ExternalViewEmbedder {
+                           public flutter::ExternalViewEmbedder,
+                           public flutter::IOSScreenShotProvider {
  public:
   IOSSurfaceGL(std::shared_ptr<IOSGLContext> context,
                fml::scoped_nsobject<CAEAGLLayer> layer,
@@ -50,6 +52,8 @@ class IOSSurfaceGL final : public IOSSurface,
 
   // |GPUSurfaceGLDelegate|
   flutter::ExternalViewEmbedder* GetExternalViewEmbedder() override;
+
+  flutter::PlatformScreenShotProvider* GetScreenShotProvider() override;
 
   // |flutter::ExternalViewEmbedder|
   void CancelFrame() override;

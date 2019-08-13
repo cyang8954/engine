@@ -135,6 +135,14 @@ flutter::ExternalViewEmbedder* IOSSurfaceSoftware::GetExternalViewEmbedder() {
   }
 }
 
+flutter::PlatformScreenShotProvider* IOSSurfaceSoftware::GetScreenShotProvider() {
+  if (IsIosEmbeddedViewsPreviewEnabled()) {
+    return this;
+  } else {
+    return nullptr;
+  }
+}
+
 void IOSSurfaceSoftware::CancelFrame() {
   FlutterPlatformViewsController* platform_views_controller = GetPlatformViewsController();
   FML_CHECK(platform_views_controller != nullptr);
@@ -181,6 +189,7 @@ bool IOSSurfaceSoftware::SubmitFrame(GrContext* context) {
   return platform_views_controller->SubmitFrame(false, nullptr, nullptr);
 }
 
+// |flutter::PlatformScreenShotProvider|
 sk_sp<SkImage> IOSSurfaceSoftware::TakeScreenShot() {
   FlutterPlatformViewsController* platform_views_controller = GetPlatformViewsController();
   FML_CHECK(platform_views_controller != nullptr);
