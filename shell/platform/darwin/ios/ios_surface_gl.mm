@@ -90,7 +90,6 @@ flutter::PlatformScreenShotProvider* IOSSurfaceGL::GetScreenShotProvider() {
   }
 }
 
-
 void IOSSurfaceGL::CancelFrame() {
   FlutterPlatformViewsController* platform_views_controller = GetPlatformViewsController();
   FML_CHECK(platform_views_controller != nullptr);
@@ -145,9 +144,7 @@ bool IOSSurfaceGL::SubmitFrame(GrContext* context) {
 }
 
 sk_sp<SkImage> IOSSurfaceGL::TakeScreenShot() {
-  FlutterPlatformViewsController* platform_views_controller = GetPlatformViewsController();
-  FML_CHECK(platform_views_controller != nullptr);
-  return ScreenShot(platform_views_controller->GetFlutterView());
+  return ScreenShot();
 }
 
 }  // namespace flutter

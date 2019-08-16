@@ -99,6 +99,9 @@ class ShellTestPlatformView : public PlatformView, public GPUSurfaceGLDelegate {
   // |GPUSurfaceGLDelegate|
   GLProcResolver GetGLProcResolver() const override;
 
+  // |GPUSurfaceGLDelegate|
+  PlatformScreenShotProvider* GetScreenShotProvider() override;
+
   FML_DISALLOW_COPY_AND_ASSIGN(ShellTestPlatformView);
 };
 

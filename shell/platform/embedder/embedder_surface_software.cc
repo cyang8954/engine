@@ -104,4 +104,9 @@ bool EmbedderSurfaceSoftware::PresentBackingStore(
   );
 }
 
+// |GPUSurfaceGLDelegate|
+PlatformScreenShotProvider* EmbedderSurfaceSoftware::GetScreenShotProvider() {
+  return nullptr;
+}
+
 }  // namespace flutter

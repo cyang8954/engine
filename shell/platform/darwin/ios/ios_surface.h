@@ -36,7 +36,7 @@ class IOSSurface {
  protected:
   FlutterPlatformViewsController* GetPlatformViewsController();
 
-  sk_sp<SkImage> ScreenShot(UIView *view);
+  sk_sp<SkImage> ScreenShot();
 
  private:
   FlutterPlatformViewsController* platform_views_controller_;

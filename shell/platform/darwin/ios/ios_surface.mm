@@ -28,7 +28,9 @@ FlutterPlatformViewsController* IOSSurface::GetPlatformViewsController() {
   return platform_views_controller_;
 }
 
-sk_sp<SkImage> IOSSurface::ScreenShot(UIView *view) {
+sk_sp<SkImage> IOSSurface::ScreenShot() {
+  FML_CHECK(platform_views_controller_ != nullptr);
+  UIView* view = platform_views_controller_->GetFlutterView();
   CGRect rect = view.bounds;
   UIGraphicsBeginImageContext(rect.size);
   CGContextRef ctx = UIGraphicsGetCurrentContext();
@@ -37,7 +39,7 @@ sk_sp<SkImage> IOSSurface::ScreenShot(UIView *view) {
   CGContextFillRect(ctx, rect);
 
   [view.layer renderInContext:ctx];
-  UIImage *screenshot = UIGraphicsGetImageFromCurrentImageContext();
+  UIImage* screenshot = UIGraphicsGetImageFromCurrentImageContext();
 
   UIGraphicsEndImageContext();
   CGImageRef imageRef = CGImageRetain(screenshot.CGImage);
@@ -46,16 +48,11 @@ sk_sp<SkImage> IOSSurface::ScreenShot(UIView *view) {
   size_t rowBtyes = CGImageGetBytesPerRow(imageRef);
 
   sk_sp<SkData> rasterData = SkData::MakeWithCopy(CFDataGetBytePtr(data), CFDataGetLength(data));
-  const auto image_info = SkImageInfo::Make(
-                                            CGImageGetWidth(imageRef),
-                                            CGImageGetHeight(imageRef),
-                                            kBGRA_8888_SkColorType,
-                                            kOpaque_SkAlphaType, SkColorSpace::MakeSRGB());
+  const auto image_info =
+      SkImageInfo::Make(CGImageGetWidth(imageRef), CGImageGetHeight(imageRef),
+                        kBGRA_8888_SkColorType, kOpaque_SkAlphaType, SkColorSpace::MakeSRGB());
 
-  sk_sp<SkImage> skImage = SkImage::MakeRasterData(
-                                                    image_info,
-                                                    rasterData,
-                                                    rowBtyes);
+  sk_sp<SkImage> skImage = SkImage::MakeRasterData(image_info, rasterData, rowBtyes);
 
   CGImageRelease(imageRef);
   CFRelease(data);

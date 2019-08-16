@@ -10,11 +10,9 @@
 namespace flutter {
 
 class IOSScreenShotProvider : public PlatformScreenShotProvider {
-
  protected:
-  sk_sp<SkImage> TakeScreenShotForView(UIView *view);
-
+  sk_sp<SkImage> TakeScreenShotForView(UIView* view);
 };
 
 }
-#endif //FLUTTER_SHELL_PLATFORM_DARWIN_IOS_IOS_SCREENSHOT_PROVIDER_H_
+#endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_IOS_SCREENSHOT_PROVIDER_H_
