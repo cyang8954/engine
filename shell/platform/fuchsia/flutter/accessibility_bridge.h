@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef TOPAZ_RUNTIME_FLUTTER_RUNNER_ACCESSIBILITY_BRIDGE_H_
-#define TOPAZ_RUNTIME_FLUTTER_RUNNER_ACCESSIBILITY_BRIDGE_H_
+#ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_ACCESSIBILITY_BRIDGE_H_
+#define FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_ACCESSIBILITY_BRIDGE_H_
 
 #include <fuchsia/accessibility/semantics/cpp/fidl.h>
 #include <fuchsia/sys/cpp/fidl.h>
@@ -34,7 +34,7 @@ namespace flutter_runner {
 //   (e.g. Flutter only sends updates for changed nodes, but Fuchsia requires
 //   the entire flattened subtree to be sent when a node changes.
 class AccessibilityBridge
-    : public fuchsia::accessibility::semantics::SemanticActionListener {
+    : public fuchsia::accessibility::semantics::SemanticListener {
  public:
   // TODO(MI4-2531, FIDL-718): Remove this. We shouldn't be worried about
   // batching messages at this level.
@@ -76,8 +76,7 @@ class AccessibilityBridge
 
  private:
   static constexpr int32_t kRootNodeId = 0;
-  fidl::Binding<fuchsia::accessibility::semantics::SemanticActionListener>
-      binding_;
+  fidl::Binding<fuchsia::accessibility::semantics::SemanticListener> binding_;
   fuchsia::accessibility::semantics::SemanticsManagerPtr
       fuchsia_semantics_manager_;
   fuchsia::accessibility::semantics::SemanticTreePtr tree_ptr_;
@@ -115,20 +114,26 @@ class AccessibilityBridge
   // May result in a call to FuchsiaAccessibility::Commit().
   void PruneUnreachableNodes();
 
-  // |fuchsia::accessibility::semantics::SemanticActionListener|
+  // |fuchsia::accessibility::semantics::SemanticListener|
   void OnAccessibilityActionRequested(
       uint32_t node_id,
       fuchsia::accessibility::semantics::Action action,
-      fuchsia::accessibility::semantics::SemanticActionListener::
+      fuchsia::accessibility::semantics::SemanticListener::
           OnAccessibilityActionRequestedCallback callback) override;
 
-  // |fuchsia::accessibility::semantics::SemanticActionListener|
+  // |fuchsia::accessibility::semantics::SemanticListener|
   void HitTest(
       fuchsia::math::PointF local_point,
-      fuchsia::accessibility::semantics::SemanticActionListener::HitTestCallback
+      fuchsia::accessibility::semantics::SemanticListener::HitTestCallback
           callback) override;
+
+  // |fuchsia::accessibility::semantics::SemanticListener|
+  void OnSemanticsModeChanged(
+      bool enabled,
+      OnSemanticsModeChangedCallback callback) override {}
+
   FML_DISALLOW_COPY_AND_ASSIGN(AccessibilityBridge);
 };
 }  // namespace flutter_runner
 
-#endif  // TOPAZ_RUNTIME_FLUTTER_RUNNER_ACCESSIBILITY_BRIDGE_H_
+#endif  // FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_ACCESSIBILITY_BRIDGE_H_
