@@ -73,7 +73,7 @@ class ThreadChecker final {
 #endif
 };
 
-#if !defined(NDEBUG)
+#if !defined(NDEBUG) && false
 #define FML_DECLARE_THREAD_CHECKER(c) fml::ThreadChecker c
 #define FML_DCHECK_CREATION_THREAD_IS_CURRENT(c) \
   FML_DCHECK((c).IsCreationThreadCurrent())
