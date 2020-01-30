@@ -379,7 +379,9 @@ bool FlutterPlatformViewsController::SubmitFrame(GrContext* gr_context,
     if (frame) {
       SkCanvas* canvas = frame->SkiaCanvas();
       canvas->drawPicture(picture_recorders_[view_id]->finishRecordingAsPicture());
+      FML_LOG(ERROR) << "==$ PlatformViews: flush";
       canvas->flush();
+      FML_LOG(ERROR) << "==$ PlatformViews: end flush";
       did_submit &= frame->Submit();
     }
   }
