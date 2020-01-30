@@ -181,8 +181,10 @@ PostPrerollResult FlutterPlatformViewsController::PostPrerollAction(
   const bool uiviews_mutated = HasPendingViewOperations();
   if (uiviews_mutated) {
     if (gpu_thread_merger->IsMerged()) {
+      NSLog(@"==$ is merged");
       gpu_thread_merger->ExtendLeaseTo(kDefaultMergedLeaseDuration);
     } else {
+      NSLog(@"==$ start merge, cancel frame");
       CancelFrame();
       gpu_thread_merger->MergeWithLease(kDefaultMergedLeaseDuration);
       return PostPrerollResult::kResubmitFrame;

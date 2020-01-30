@@ -187,6 +187,7 @@ bool GPUSurfaceGL::CreateOrUpdateSurfaces(const SkISize& size) {
     // Surface size appears unchanged. So bail.
     return true;
   }
+  creation_thread_ = pthread_self();
 
   // We need to do some updates.
   TRACE_EVENT0("flutter", "UpdateSurfacesSize");
@@ -200,7 +201,6 @@ bool GPUSurfaceGL::CreateOrUpdateSurfaces(const SkISize& size) {
   }
 
   sk_sp<SkSurface> onscreen_surface;
-
   onscreen_surface =
       WrapOnscreenSurface(context_.get(),            // GL context
                           size,                      // root surface size
@@ -214,6 +214,9 @@ bool GPUSurfaceGL::CreateOrUpdateSurfaces(const SkISize& size) {
     return false;
   }
 
+  char thread_name[25];
+  pthread_getname_np(pthread_self(), thread_name, 25);
+  FML_LOG(ERROR) << "==$ gpu_surface_gl: create surface " << thread_name;
   onscreen_surface_ = std::move(onscreen_surface);
 
   return true;
@@ -226,6 +229,7 @@ SkMatrix GPUSurfaceGL::GetRootTransformation() const {
 
 // |Surface|
 std::unique_ptr<SurfaceFrame> GPUSurfaceGL::AcquireFrame(const SkISize& size) {
+  FML_LOG(ERROR) << "==$ gpu_surface_gl: AcquireFrame";
   if (delegate_ == nullptr) {
     return nullptr;
   }
@@ -259,9 +263,13 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceGL::AcquireFrame(const SkISize& size) {
   SurfaceFrame::SubmitCallback submit_callback =
       [weak = weak_factory_.GetWeakPtr()](const SurfaceFrame& surface_frame,
                                           SkCanvas* canvas) {
-        return weak ? weak->PresentSurface(canvas) : false;
+        FML_LOG(ERROR) << "==$ gpu_surface_gl: PresentSurface";
+        bool present = weak ? weak->PresentSurface(canvas) : false;
+        FML_LOG(ERROR) << "==$ gpu_surface_gl: end PresentSurface";
+        return present;
       };
 
+  FML_LOG(ERROR) << "==$ gpu_surface_gl: end AcquireFrame";
   return std::make_unique<SurfaceFrame>(
       surface, delegate_->SurfaceSupportsReadback(), submit_callback);
 }
@@ -273,7 +281,10 @@ bool GPUSurfaceGL::PresentSurface(SkCanvas* canvas) {
 
   {
     TRACE_EVENT0("flutter", "SkCanvas::Flush");
+    FML_LOG(ERROR) << "==$ gpu_surface_gl: flush";
     onscreen_surface_->getCanvas()->flush();
+    FML_LOG(ERROR) << "==$ gpu_surface_gl: end flush";
+
   }
 
   if (!delegate_->GLContextPresent()) {
@@ -295,7 +306,6 @@ bool GPUSurfaceGL::PresentSurface(SkCanvas* canvas) {
     if (!new_onscreen_surface) {
       return false;
     }
-
     onscreen_surface_ = std::move(new_onscreen_surface);
   }
 

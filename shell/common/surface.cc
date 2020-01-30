@@ -30,9 +30,9 @@ bool SurfaceFrame::Submit() {
   if (submitted_) {
     return false;
   }
-
+  FML_LOG(ERROR) << "==$ Surface: Sumbit";
   submitted_ = PerformSubmit();
-
+  FML_LOG(ERROR) << "==$ Surface: end Sumbit";
   return submitted_;
 }
 

@@ -338,11 +338,17 @@ RasterStatus Rasterizer::DrawToSurface(flutter::LayerTree& layer_tree) {
   );
 
   if (compositor_frame) {
+    FML_LOG(ERROR) << "==$ Rasterizer:DrawToSurface: raster";
     RasterStatus raster_status = compositor_frame->Raster(layer_tree, false);
+    FML_LOG(ERROR) << "==$ Rasterizer:DrawToSurface: end raster";
     if (raster_status == RasterStatus::kFailed) {
       return raster_status;
     }
+    FML_LOG(ERROR) << "==$ Rasterizer:DrawToSurface: submit";
+
     frame->Submit();
+    FML_LOG(ERROR) << "==$ Rasterizer:DrawToSurface: end submit";
+
     if (external_view_embedder != nullptr) {
       external_view_embedder->SubmitFrame(surface_->GetContext());
     }

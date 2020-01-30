@@ -6,6 +6,7 @@
 #define SHELL_GPU_GPU_SURFACE_GL_H_
 
 #include <functional>
+#include <pthread.h>
 #include <memory>
 
 #include "flutter/flow/embedded_views.h"
@@ -66,6 +67,8 @@ class GPUSurfaceGL : public Surface {
       const SkMatrix& root_surface_transformation);
 
   bool PresentSurface(SkCanvas* canvas);
+
+  pthread_t creation_thread_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(GPUSurfaceGL);
 };
