@@ -30,6 +30,7 @@
 namespace flutter {
 namespace {
 
+static Dart_LibraryTagHandler g_embedder_tag_handler;
 static tonic::DartLibraryNatives* g_natives;
 static std::string g_observatory_uri;
 
@@ -126,11 +127,17 @@ void DartServiceIsolate::Shutdown(Dart_NativeArguments args) {
 
 bool DartServiceIsolate::Startup(std::string server_ip,
                                  intptr_t server_port,
+                                 Dart_LibraryTagHandler embedder_tag_handler,
                                  bool disable_origin_check,
                                  bool disable_service_auth_codes,
+                                 bool enable_service_port_fallback,
                                  char** error) {
   Dart_Isolate isolate = Dart_CurrentIsolate();
   FML_CHECK(isolate);
+
+  // Remember the embedder's library tag handler.
+  g_embedder_tag_handler = embedder_tag_handler;
+  FML_CHECK(g_embedder_tag_handler);
 
   // Setup native entries.
   if (!g_natives) {
@@ -190,6 +197,9 @@ bool DartServiceIsolate::Startup(std::string server_ip,
       Dart_SetField(library, Dart_NewStringFromCString("_authCodesDisabled"),
                     Dart_NewBoolean(disable_service_auth_codes));
   SHUTDOWN_ON_ERROR(result);
+  result = Dart_SetField(
+      library, Dart_NewStringFromCString("_enableServicePortFallback"),
+      Dart_NewBoolean(enable_service_port_fallback));
   return true;
 }
 
