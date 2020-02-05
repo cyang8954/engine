@@ -180,6 +180,7 @@ PostPrerollResult FlutterPlatformViewsController::PostPrerollAction(
     fml::RefPtr<fml::GpuThreadMerger> gpu_thread_merger) {
   const bool uiviews_mutated = HasPendingViewOperations();
   if (uiviews_mutated) {
+    FML_DLOG(ERROR) << "PostPrerollAction merged";
     if (gpu_thread_merger->IsMerged()) {
       gpu_thread_merger->ExtendLeaseTo(kDefaultMergedLeaseDuration);
     } else {
@@ -386,6 +387,21 @@ bool FlutterPlatformViewsController::SubmitFrame(GrContext* gr_context,
     composition_order_.clear();
     return did_submit;
   }
+  if ([NSThread currentThread] != [NSThread mainThread]) {
+    FML_DLOG(ERROR) << "SubmitFrame";
+
+    auto vtos = [](std::vector<int64_t> v) {
+      std::stringstream iss;
+      for (auto x : v) {
+        iss << x << ", ";
+      }
+      return iss.str();
+    };
+
+    FML_DLOG(ERROR) << "composition_order_ " << vtos(composition_order_);
+    FML_DLOG(ERROR) << "active_composition_order_ " << vtos(active_composition_order_);
+  }
+
   DetachUnusedLayers();
   active_composition_order_.clear();
   UIView* flutter_view = flutter_view_.get();
