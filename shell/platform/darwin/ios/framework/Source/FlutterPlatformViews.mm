@@ -15,6 +15,9 @@
 #include "FlutterPlatformViews_Internal.h"
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
+#import <OpenGLES/EAGL.h>
+#import <OpenGLES/ES2/gl.h>
+#import <OpenGLES/ES2/glext.h>
 
 namespace flutter {
 
@@ -201,6 +204,7 @@ PostPrerollResult FlutterPlatformViewsController::PostPrerollAction(
 
 void FlutterPlatformViewsController::EndFrame(fml::RefPtr<fml::GpuThreadMerger> gpu_thread_merger) {
   if (will_merge_) {
+    glFinish();
     FML_DLOG(ERROR) << "EndFrame merged";
     gpu_thread_merger->MergeWithLease(kDefaultMergedLeaseDuration);
   //       int NAMELEN = 20;
