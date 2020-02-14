@@ -84,7 +84,8 @@ void FlutterPlatformViewsController::OnCreate(FlutterMethodCall* call, FlutterRe
                                                            viewIdentifier:viewId
                                                                 arguments:params];
   views_[viewId] = fml::scoped_nsobject<NSObject<FlutterPlatformView>>([embedded_view retain]);
-
+  // UIView *view = [[UIView alloc] init];
+  // view.backgroundColor = [[UIColor redColor] autorelease];
   FlutterTouchInterceptingView* touch_interceptor = [[[FlutterTouchInterceptingView alloc]
        initWithEmbeddedView:embedded_view.view
       flutterViewController:flutter_view_controller_.get()] autorelease];
@@ -162,6 +163,12 @@ void FlutterPlatformViewsController::SetFrameSize(SkISize frame_size) {
 
 void FlutterPlatformViewsController::CancelFrame() {
   composition_order_.clear();
+  //     int NAMELEN = 20;
+  // char thread_name[NAMELEN];
+  // const pthread_t thread = pthread_self();
+  // pthread_getname_np(thread, thread_name, NAMELEN);
+  // FML_DLOG(ERROR) << "#transaction commit " << thread_name;
+  // [CATransaction commit];
 }
 
 bool FlutterPlatformViewsController::HasPendingViewOperations() {
@@ -179,17 +186,31 @@ const int FlutterPlatformViewsController::kDefaultMergedLeaseDuration;
 PostPrerollResult FlutterPlatformViewsController::PostPrerollAction(
     fml::RefPtr<fml::GpuThreadMerger> gpu_thread_merger) {
   const bool uiviews_mutated = HasPendingViewOperations();
+  gpu_thread_merger_ = gpu_thread_merger;
   if (uiviews_mutated) {
-    FML_DLOG(ERROR) << "PostPrerollAction merged";
-    if (gpu_thread_merger->IsMerged()) {
-      gpu_thread_merger->ExtendLeaseTo(kDefaultMergedLeaseDuration);
-    } else {
+    if (!gpu_thread_merger->IsMerged()) {
+       will_merge_ = true;
       CancelFrame();
-      gpu_thread_merger->MergeWithLease(kDefaultMergedLeaseDuration);
       return PostPrerollResult::kResubmitFrame;
+    } else {
+      gpu_thread_merger->ExtendLeaseTo(kDefaultMergedLeaseDuration);
     }
   }
   return PostPrerollResult::kSuccess;
+}
+
+void FlutterPlatformViewsController::EndFrame(fml::RefPtr<fml::GpuThreadMerger> gpu_thread_merger) {
+  if (will_merge_) {
+    FML_DLOG(ERROR) << "EndFrame merged";
+    gpu_thread_merger->MergeWithLease(kDefaultMergedLeaseDuration);
+  //       int NAMELEN = 20;
+  // char thread_name[NAMELEN];
+  // const pthread_t thread = pthread_self();
+  // pthread_getname_np(thread, thread_name, NAMELEN);
+  // FML_DLOG(ERROR) << "#transaction commit " << thread_name;
+  //     [CATransaction commit];
+  }
+  will_merge_ = false;
 }
 
 void FlutterPlatformViewsController::PrerollCompositeEmbeddedView(
@@ -368,6 +389,13 @@ void FlutterPlatformViewsController::Reset() {
 
 bool FlutterPlatformViewsController::SubmitFrame(GrContext* gr_context,
                                                  std::shared_ptr<IOSGLContext> gl_context) {
+
+  int NAMELEN = 20;
+  char thread_name[NAMELEN];
+  const pthread_t thread = pthread_self();
+  pthread_getname_np(thread, thread_name, NAMELEN);
+  FML_DLOG(ERROR) << "@SubmitFrame " << thread_name;
+
   DisposeViews();
 
   bool did_submit = true;
@@ -383,8 +411,15 @@ bool FlutterPlatformViewsController::SubmitFrame(GrContext* gr_context,
     }
   }
   picture_recorders_.clear();
+
   if (composition_order_ == active_composition_order_) {
+
     composition_order_.clear();
+  //   if (will_merge_) {
+  //     return did_submit;
+  //   }
+  // FML_DLOG(ERROR) << "#transaction commit " << thread_name;
+    // [CATransaction commit];
     return did_submit;
   }
   if ([NSThread currentThread] != [NSThread mainThread]) {
@@ -406,7 +441,13 @@ bool FlutterPlatformViewsController::SubmitFrame(GrContext* gr_context,
   active_composition_order_.clear();
   UIView* flutter_view = flutter_view_.get();
 
+
   for (size_t i = 0; i < composition_order_.size(); i++) {
+    int NAMELEN = 20;
+    char thread_name[NAMELEN];
+    const pthread_t thread = pthread_self();
+    pthread_getname_np(thread, thread_name, NAMELEN);
+    FML_DLOG(ERROR) << "@SubmitFrame add views " << thread_name;
     int view_id = composition_order_[i];
     // We added a chain of super views to the platform view to handle clipping.
     // The `platform_view_root` is the view at the top of the chain which is a direct subview of the
@@ -426,6 +467,11 @@ bool FlutterPlatformViewsController::SubmitFrame(GrContext* gr_context,
     active_composition_order_.push_back(view_id);
   }
   composition_order_.clear();
+
+  // FML_DCHECK(!will_merge_);
+
+  // FML_DLOG(ERROR) << "#transaction commit " << thread_name;
+  // [CATransaction commit];
   return did_submit;
 }
 

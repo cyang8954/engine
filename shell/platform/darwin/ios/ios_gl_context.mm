@@ -9,11 +9,17 @@
 #include "flutter/fml/trace_event.h"
 #include "third_party/skia/include/gpu/GrContextOptions.h"
 #include "third_party/skia/include/gpu/gl/GrGLInterface.h"
+#include <pthread.h>
 
 namespace flutter {
 
 IOSGLContext::IOSGLContext() {
   resource_context_.reset([[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES3]);
+  int NAMELEN = 20;
+  char thread_name[NAMELEN];
+  const pthread_t thread = pthread_self();
+  pthread_getname_np(thread, thread_name, NAMELEN);
+  FML_DLOG(ERROR) << "EAGLContext init in thread: " << thread_name;
   if (resource_context_ != nullptr) {
     context_.reset([[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES3
                                          sharegroup:resource_context_.get().sharegroup]);

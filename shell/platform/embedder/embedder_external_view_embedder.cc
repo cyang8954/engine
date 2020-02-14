@@ -276,6 +276,10 @@ bool EmbedderExternalViewEmbedder::SubmitFrame(GrContext* context) {
   return true;
 }
 
+void EmbedderExternalViewEmbedder::EndFrame(fml::RefPtr<fml::GpuThreadMerger> gpu_thread_merger) {
+  
+}
+
 // |ExternalViewEmbedder|
 SkCanvas* EmbedderExternalViewEmbedder::GetRootCanvas() {
   if (!root_picture_recorder_) {

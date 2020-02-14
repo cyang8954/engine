@@ -102,6 +102,8 @@ class FlutterPlatformViewsController {
 
   SkCanvas* CompositeEmbeddedView(int view_id);
 
+  void EndFrame(fml::RefPtr<fml::GpuThreadMerger> gpu_thread_merger);
+
   // Discards all platform views instances and auxiliary resources.
   void Reset();
 
@@ -129,6 +131,9 @@ class FlutterPlatformViewsController {
   std::map<int64_t, int64_t> clip_count_;
   std::map<int64_t, std::unique_ptr<FlutterPlatformViewLayer>> overlays_;
   SkISize frame_size_;
+
+  fml::RefPtr<fml::GpuThreadMerger> gpu_thread_merger_;
+  bool will_merge_;
 
   // This is the number of frames the task runners will stay
   // merged after a frame where we see a mutation to the embedded views.

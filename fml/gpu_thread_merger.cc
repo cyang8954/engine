@@ -23,7 +23,7 @@ GpuThreadMerger::GpuThreadMerger(fml::TaskQueueId platform_queue_id,
 
 void GpuThreadMerger::MergeWithLease(size_t lease_term) {
   TRACE_EVENT0("flutter", __PRETTY_FUNCTION__);
-
+  FML_DLOG(ERROR) << "$GpuThreadMerger MergeWithLease";
   FML_DCHECK(lease_term > 0) << "lease_term should be positive.";
   if (!is_merged_) {
     FML_DLOG(ERROR) << "threads are merged";
@@ -45,7 +45,7 @@ bool GpuThreadMerger::IsOnRasterizingThread() {
 
 void GpuThreadMerger::ExtendLeaseTo(size_t lease_term) {
   TRACE_EVENT0("flutter", __PRETTY_FUNCTION__);
-
+  FML_DLOG(ERROR) << "$GpuThreadMerger ExtendLeaseTo";
   FML_DCHECK(lease_term > 0) << "lease_term should be positive.";
   FML_DLOG(ERROR) << "Lease extended";
   if (lease_term_ != kLeaseNotSet && (int)lease_term > lease_term_) {
@@ -61,7 +61,7 @@ bool GpuThreadMerger::IsMerged() const {
 
 GpuThreadStatus GpuThreadMerger::DecrementLease() {
   TRACE_EVENT0("flutter", __PRETTY_FUNCTION__);
-
+  FML_DLOG(ERROR) << "$GpuThreadMerger DecrementLease";
   if (!is_merged_) {
     return GpuThreadStatus::kRemainsUnmerged;
   }

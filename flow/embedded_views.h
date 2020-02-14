@@ -230,6 +230,8 @@ class ExternalViewEmbedder {
                           GrContext* context,
                           double device_pixel_ratio) = 0;
 
+  virtual void EndFrame(fml::RefPtr<fml::GpuThreadMerger> gpu_thread_merger) = 0;
+
   virtual void PrerollCompositeEmbeddedView(
       int view_id,
       std::unique_ptr<EmbeddedViewParams> params) = 0;

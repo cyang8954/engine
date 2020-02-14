@@ -60,6 +60,8 @@ GPUSurfaceGL::GPUSurfaceGL(GPUSurfaceGLDelegate* delegate,
   // ES2 shading language when the ES3 external image extension is missing.
   options.fPreferExternalImagesOverES3 = true;
 
+  // options.fUseDrawInsteadOfClear = GrContextOptions::Enable::kYes;
+
   // TODO(goderbauer): remove option when skbug.com/7523 is fixed.
   // A similar work-around is also used in shell/common/io_manager.cc.
   options.fDisableGpuYUVConversion = true;

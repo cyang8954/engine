@@ -94,6 +94,8 @@ class EmbedderExternalViewEmbedder final : public ExternalViewEmbedder {
   // |ExternalViewEmbedder|
   SkCanvas* GetRootCanvas() override;
 
+  void EndFrame(fml::RefPtr<fml::GpuThreadMerger> gpu_thread_merger) override;
+
  private:
   using ViewIdentifier = int64_t;
   struct RegistryKey {

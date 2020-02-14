@@ -197,4 +197,10 @@ bool IOSSurfaceSoftware::SubmitFrame(GrContext* context) {
   return platform_views_controller->SubmitFrame(nullptr, nullptr);
 }
 
+void IOSSurfaceSoftware::EndFrame(fml::RefPtr<fml::GpuThreadMerger> gpu_thread_merger) {
+  FlutterPlatformViewsController* platform_views_controller = GetPlatformViewsController();
+  FML_CHECK(platform_views_controller != nullptr);
+  return platform_views_controller->EndFrame(gpu_thread_merger);
+}
+
 }  // namespace flutter
