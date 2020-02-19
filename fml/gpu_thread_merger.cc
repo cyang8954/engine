@@ -76,7 +76,7 @@ GpuThreadStatus GpuThreadMerger::DecrementLease() {
   lease_term_--;
   if (lease_term_ == 0) {
     bool success = task_queues_->Unmerge(platform_queue_id_);
-    FML_DLOG(ERROR) << "threads are unmerged";
+    FML_DLOG(ERROR) << "$GpuThreadMerger threads are unmerged";
     FML_CHECK(success) << "Unable to un-merge the GPU and platform threads.";
     is_merged_ = false;
     return GpuThreadStatus::kUnmergedNow;

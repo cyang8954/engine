@@ -66,6 +66,11 @@ bool IOSSurfaceGL::GLContextMakeCurrent() {
 }
 
 bool IOSSurfaceGL::GLContextClearCurrent() {
+  int NAMELEN = 20;
+  char thread_name[NAMELEN];
+  const pthread_t thread = pthread_self();
+  pthread_getname_np(thread, thread_name, NAMELEN);
+  FML_DLOG(ERROR) << "&GLContext GLContextClearCurrent in thread: " << thread_name;
   [EAGLContext setCurrentContext:nil];
   return true;
 }

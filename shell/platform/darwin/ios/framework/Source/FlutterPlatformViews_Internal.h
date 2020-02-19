@@ -133,7 +133,7 @@ class FlutterPlatformViewsController {
   SkISize frame_size_;
 
   fml::RefPtr<fml::GpuThreadMerger> gpu_thread_merger_;
-  bool will_merge_;
+  bool will_merge_ = false;
 
   // This is the number of frames the task runners will stay
   // merged after a frame where we see a mutation to the embedded views.

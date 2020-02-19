@@ -111,6 +111,7 @@ void Animator::BeginFrame(fml::TimePoint frame_start_time,
   frame_scheduled_ = false;
   notify_idle_task_id_++;
   regenerate_layer_tree_ = false;
+  FML_DLOG(ERROR) << "semaphore_signal";
   pending_frame_semaphore_.Signal();
 
   if (!producer_continuation_) {

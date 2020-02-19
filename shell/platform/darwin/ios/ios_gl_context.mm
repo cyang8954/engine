@@ -28,6 +28,8 @@ IOSGLContext::IOSGLContext() {
     context_.reset([[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2
                                          sharegroup:resource_context_.get().sharegroup]);
   }
+  // context_.get().multiThreaded = YES;
+  // resource_context_.get().multiThreaded = YES;
 
   // TODO:
   // iOS displays are more variable than just P3 or sRGB.  Reading the display
@@ -59,10 +61,20 @@ std::unique_ptr<IOSGLRenderTarget> IOSGLContext::CreateRenderTarget(
 }
 
 bool IOSGLContext::MakeCurrent() {
+  int NAMELEN = 20;
+  char thread_name[NAMELEN];
+  const pthread_t thread = pthread_self();
+  pthread_getname_np(thread, thread_name, NAMELEN);
+  FML_DLOG(ERROR) << "&GLContext MakeCurrent in thread: " << thread_name;
   return [EAGLContext setCurrentContext:context_.get()];
 }
 
 bool IOSGLContext::ResourceMakeCurrent() {
+  int NAMELEN = 20;
+  char thread_name[NAMELEN];
+  const pthread_t thread = pthread_self();
+  pthread_getname_np(thread, thread_name, NAMELEN);
+  FML_DLOG(ERROR) << "&GLContext Resource MakeCurrent in thread: " << thread_name;
   return [EAGLContext setCurrentContext:resource_context_.get()];
 }
 

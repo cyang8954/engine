@@ -129,9 +129,9 @@ void Rasterizer::Draw(fml::RefPtr<Pipeline<flutter::LayerTree>> pipeline) {
   if (raster_status == RasterStatus::kResubmit) {
     auto front_continuation = pipeline->ProduceToFront();
     auto* external_view_embedder = surface_->GetExternalViewEmbedder();
-    external_view_embedder->EndFrame(gpu_thread_merger_);
     front_continuation.Complete(std::move(resubmitted_layer_tree_));
     consume_result = PipelineConsumeResult::MoreAvailable;
+    external_view_embedder->EndFrame(gpu_thread_merger_);
   } else if (raster_status == RasterStatus::kEnqueuePipeline) {
     consume_result = PipelineConsumeResult::MoreAvailable;
   }

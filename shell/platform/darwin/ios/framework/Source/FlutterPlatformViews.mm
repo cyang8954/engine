@@ -189,11 +189,14 @@ const int FlutterPlatformViewsController::kDefaultMergedLeaseDuration;
 PostPrerollResult FlutterPlatformViewsController::PostPrerollAction(
     fml::RefPtr<fml::GpuThreadMerger> gpu_thread_merger) {
   const bool uiviews_mutated = HasPendingViewOperations();
+  FML_DLOG(ERROR) << "PostPrerollAction ";
+  FML_DLOG(ERROR) << "uiviews_mutated " << uiviews_mutated;
+  FML_DLOG(ERROR) << "gpu_thread_merger->IsMerged() " << gpu_thread_merger->IsMerged();
   gpu_thread_merger_ = gpu_thread_merger;
   if (uiviews_mutated) {
     if (!gpu_thread_merger->IsMerged()) {
+      FML_DLOG(ERROR) << "&& will Merge";
        will_merge_ = true;
-      CancelFrame();
       return PostPrerollResult::kResubmitFrame;
     } else {
       gpu_thread_merger->ExtendLeaseTo(kDefaultMergedLeaseDuration);
@@ -204,8 +207,7 @@ PostPrerollResult FlutterPlatformViewsController::PostPrerollAction(
 
 void FlutterPlatformViewsController::EndFrame(fml::RefPtr<fml::GpuThreadMerger> gpu_thread_merger) {
   if (will_merge_) {
-    glFinish();
-    FML_DLOG(ERROR) << "EndFrame merged";
+    FML_DLOG(ERROR) << "&& EndFrame merged";
     gpu_thread_merger->MergeWithLease(kDefaultMergedLeaseDuration);
   //       int NAMELEN = 20;
   // char thread_name[NAMELEN];
@@ -408,11 +410,16 @@ bool FlutterPlatformViewsController::SubmitFrame(GrContext* gr_context,
     auto frame = overlays_[view_id]->surface->AcquireFrame(frame_size_);
     // If frame is null, AcquireFrame already printed out an error message.
     if (frame) {
+      FML_DLOG(ERROR) << "&& platform view canvas flush";
       SkCanvas* canvas = frame->SkiaCanvas();
       canvas->drawPicture(picture_recorders_[view_id]->finishRecordingAsPicture());
       canvas->flush();
       did_submit &= frame->Submit();
     }
+  }
+  if (will_merge_ == true) {
+    FML_DLOG(ERROR) << "&& will_merge_ cancel frame";
+    CancelFrame();
   }
   picture_recorders_.clear();
 
