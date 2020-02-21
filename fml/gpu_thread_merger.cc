@@ -18,12 +18,14 @@ GpuThreadMerger::GpuThreadMerger(fml::TaskQueueId platform_queue_id,
       gpu_queue_id_(gpu_queue_id),
       task_queues_(fml::MessageLoopTaskQueues::GetInstance()),
       lease_term_(kLeaseNotSet) {
+  FML_DLOG(ERROR) << "platform id " << platform_queue_id;
+  FML_DLOG(ERROR) << "gpu_queue_id id " << gpu_queue_id;
   is_merged_ = task_queues_->Owns(platform_queue_id_, gpu_queue_id_);
 }
 
 void GpuThreadMerger::MergeWithLease(size_t lease_term) {
   TRACE_EVENT0("flutter", __PRETTY_FUNCTION__);
-  FML_DLOG(ERROR) << "$GpuThreadMerger MergeWithLease";
+  FML_DLOG(ERROR) << "$ GpuThreadMerger MergeWithLease";
   FML_DCHECK(lease_term > 0) << "lease_term should be positive.";
   if (!is_merged_) {
     FML_DLOG(ERROR) << "threads are merged";
@@ -45,7 +47,7 @@ bool GpuThreadMerger::IsOnRasterizingThread() {
 
 void GpuThreadMerger::ExtendLeaseTo(size_t lease_term) {
   TRACE_EVENT0("flutter", __PRETTY_FUNCTION__);
-  FML_DLOG(ERROR) << "$GpuThreadMerger ExtendLeaseTo";
+  FML_DLOG(ERROR) << "$ GpuThreadMerger ExtendLeaseTo";
   FML_DCHECK(lease_term > 0) << "lease_term should be positive.";
   FML_DLOG(ERROR) << "Lease extended";
   if (lease_term_ != kLeaseNotSet && (int)lease_term > lease_term_) {
@@ -61,7 +63,6 @@ bool GpuThreadMerger::IsMerged() const {
 
 GpuThreadStatus GpuThreadMerger::DecrementLease() {
   TRACE_EVENT0("flutter", __PRETTY_FUNCTION__);
-  FML_DLOG(ERROR) << "$GpuThreadMerger DecrementLease";
   if (!is_merged_) {
     return GpuThreadStatus::kRemainsUnmerged;
   }
@@ -75,8 +76,9 @@ GpuThreadStatus GpuThreadMerger::DecrementLease() {
       << "lease_term should always be positive when merged.";
   lease_term_--;
   if (lease_term_ == 0) {
+    FML_DLOG(ERROR) << "$ GpuThreadMerger threads are unmerging";
     bool success = task_queues_->Unmerge(platform_queue_id_);
-    FML_DLOG(ERROR) << "$GpuThreadMerger threads are unmerged";
+    FML_DLOG(ERROR) << "$ GpuThreadMerger threads are unmerged";
     FML_CHECK(success) << "Unable to un-merge the GPU and platform threads.";
     is_merged_ = false;
     return GpuThreadStatus::kUnmergedNow;

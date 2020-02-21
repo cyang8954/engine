@@ -103,7 +103,7 @@ void FlutterPlatformViewsController::OnCreate(FlutterMethodCall* call, FlutterRe
 void FlutterPlatformViewsController::OnDispose(FlutterMethodCall* call, FlutterResult& result) {
   NSNumber* arg = [call arguments];
   int64_t viewId = [arg longLongValue];
-
+  FML_DLOG(ERROR) << "$ OnDispose";
   if (views_.count(viewId) == 0) {
     result([FlutterError errorWithCode:@"unknown_view"
                                message:@"trying to dispose an unknown"
@@ -289,6 +289,7 @@ UIView* FlutterPlatformViewsController::ReconstructClipViewsChain(int number_of_
     head = clippingView;
     clipIndex++;
   }
+  FML_DLOG(ERROR) << "$ ReconstructClipViewsChain";
   [head removeFromSuperview];
 
   if (indexInFlutterView > -1) {
@@ -380,6 +381,7 @@ SkCanvas* FlutterPlatformViewsController::CompositeEmbeddedView(int view_id) {
 
 void FlutterPlatformViewsController::Reset() {
   UIView* flutter_view = flutter_view_.get();
+  FML_DLOG(ERROR) << "$ RESET";
   for (UIView* sub_view in [flutter_view subviews]) {
     [sub_view removeFromSuperview];
   }
@@ -395,7 +397,6 @@ void FlutterPlatformViewsController::Reset() {
 
 bool FlutterPlatformViewsController::SubmitFrame(GrContext* gr_context,
                                                  std::shared_ptr<IOSGLContext> gl_context) {
-
   int NAMELEN = 20;
   char thread_name[NAMELEN];
   const pthread_t thread = pthread_self();
@@ -420,6 +421,7 @@ bool FlutterPlatformViewsController::SubmitFrame(GrContext* gr_context,
   if (will_merge_ == true) {
     FML_DLOG(ERROR) << "&& will_merge_ cancel frame";
     CancelFrame();
+    return did_submit;
   }
   picture_recorders_.clear();
 
@@ -474,6 +476,7 @@ bool FlutterPlatformViewsController::SubmitFrame(GrContext* gr_context,
       [flutter_view addSubview:overlay];
       overlay.frame = flutter_view.bounds;
     }
+    FML_DLOG(ERROR) << "$ submit frame view added";
 
     active_composition_order_.push_back(view_id);
   }
@@ -502,6 +505,7 @@ void FlutterPlatformViewsController::DetachUnusedLayers() {
       // The `platform_view_root` is the view at the top of the chain which is a direct subview of
       // the `FlutterView`.
       UIView* platform_view_root = root_views_[view_id].get();
+      FML_DLOG(ERROR) << "$ DetachUnusedLayers";
       [platform_view_root removeFromSuperview];
       [overlays_[view_id]->overlay_view.get() removeFromSuperview];
     }
@@ -512,7 +516,7 @@ void FlutterPlatformViewsController::DisposeViews() {
   if (views_to_dispose_.empty()) {
     return;
   }
-
+  FML_DLOG(ERROR) << "$ Dispose views";
   for (int64_t viewId : views_to_dispose_) {
     UIView* root_view = root_views_[viewId].get();
     [root_view removeFromSuperview];

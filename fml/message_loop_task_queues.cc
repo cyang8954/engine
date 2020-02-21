@@ -99,7 +99,9 @@ void MessageLoopTaskQueues::GetTasksToRunNow(
 
   const auto now = fml::TimePoint::Now();
 
+  int i = 0;
   while (HasPendingTasksUnlocked(queue_id)) {
+        i ++;
     TaskQueueId top_queue = _kUnmerged;
     const auto& top = PeekNextTaskUnlocked(queue_id, top_queue);
     if (top.GetTargetTime() > now) {
@@ -110,6 +112,10 @@ void MessageLoopTaskQueues::GetTasksToRunNow(
     if (type == FlushType::kSingle) {
       break;
     }
+  }
+
+  if (i > 1) {
+    FML_DLOG(ERROR) << "more than one tasks in queue " << queue_id;
   }
 
   if (!HasPendingTasksUnlocked(queue_id)) {

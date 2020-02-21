@@ -32,14 +32,17 @@ fml::RefPtr<fml::TaskRunner> TaskRunners::GetPlatformTaskRunner() const {
 }
 
 fml::RefPtr<fml::TaskRunner> TaskRunners::GetUITaskRunner() const {
+
   return ui_;
 }
 
 fml::RefPtr<fml::TaskRunner> TaskRunners::GetIOTaskRunner() const {
+
   return io_;
 }
 
 fml::RefPtr<fml::TaskRunner> TaskRunners::GetGPUTaskRunner() const {
+
   return gpu_;
 }
 

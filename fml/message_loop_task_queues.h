@@ -124,6 +124,8 @@ class MessageLoopTaskQueues
   // Returns true if owner owns the subsumed task queue.
   bool Owns(TaskQueueId owner, TaskQueueId subsumed) const;
 
+  std::map<TaskQueueId, std::unique_ptr<TaskQueueEntry>> queue_entries_;
+
  private:
   class MergedQueuesRunner;
 
@@ -144,7 +146,7 @@ class MessageLoopTaskQueues
   static fml::RefPtr<MessageLoopTaskQueues> instance_;
 
   mutable std::mutex queue_mutex_;
-  std::map<TaskQueueId, std::unique_ptr<TaskQueueEntry>> queue_entries_;
+  // std::map<TaskQueueId, std::unique_ptr<TaskQueueEntry>> queue_entries_;
 
   size_t task_queue_id_counter_;
 

@@ -117,19 +117,38 @@ void MessageLoopImpl::DoTerminate() {
   Terminate();
 }
 
+std::mutex MessageLoopImpl::invoke_mutex_;
+
 void MessageLoopImpl::FlushTasks(FlushType type) {
   TRACE_EVENT0("fml", "MessageLoop::FlushTasks");
   std::vector<fml::closure> invocations;
 
   task_queue_->GetTasksToRunNow(queue_id_, type, invocations);
 
+  TaskQueueId queueId = GetTaskQueueId();
   for (const auto& invocation : invocations) {
-    invocation();
-    std::vector<fml::closure> observers =
-        task_queue_->GetObserversToNotify(queue_id_);
-    for (const auto& observer : observers) {
-      observer();
+    const TaskQueueId subsumed = task_queue_->queue_entries_.at(queueId)->owner_of;
+    const TaskQueueId owner = task_queue_->queue_entries_.at(queueId)->subsumed_by;
+    if (subsumed != _kUnmerged|| owner != _kUnmerged) {
+        // std::lock_guard guard(invoke_mutex_);
+        // FML_DLOG(ERROR) << "@== mutex guard invoke queue_id " << queueId;
+        // FML_DLOG(ERROR) << "@== mutex guard invoke owner " << owner;
+        // FML_DLOG(ERROR) << "@== mutex guard invoke subsumed " << subsumed;
+        invocation();
+        std::vector<fml::closure> observers =
+            task_queue_->GetObserversToNotify(queue_id_);
+        for (const auto& observer : observers) {
+          observer();
+        }
+    } else {
+        invocation();
+        std::vector<fml::closure> observers =
+            task_queue_->GetObserversToNotify(queue_id_);
+        for (const auto& observer : observers) {
+          observer();
+        }
     }
+
   }
 }
 

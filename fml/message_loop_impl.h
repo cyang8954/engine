@@ -46,6 +46,10 @@ class MessageLoopImpl : public Wakeable,
 
   virtual TaskQueueId GetTaskQueueId() const;
 
+  fml::RefPtr<MessageLoopTaskQueues> task_queue_;
+  TaskQueueId queue_id_;
+  static std::mutex invoke_mutex_;
+
  protected:
   // Exposed for the embedder shell which allows clients to poll for events
   // instead of dedicating a thread to the message loop.
@@ -59,8 +63,6 @@ class MessageLoopImpl : public Wakeable,
   MessageLoopImpl();
 
  private:
-  fml::RefPtr<MessageLoopTaskQueues> task_queue_;
-  TaskQueueId queue_id_;
 
   std::atomic_bool terminated_;
 
