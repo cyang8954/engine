@@ -70,7 +70,6 @@ bool IOSSurfaceGL::GLContextClearCurrent() {
   char thread_name[NAMELEN];
   const pthread_t thread = pthread_self();
   pthread_getname_np(thread, thread_name, NAMELEN);
-  FML_DLOG(ERROR) << "&GLContext GLContextClearCurrent in thread: " << thread_name;
   [EAGLContext setCurrentContext:nil];
   return true;
 }
@@ -103,12 +102,16 @@ void IOSSurfaceGL::CancelFrame() {
   platform_views_controller->CancelFrame();
   // Committing the current transaction as |BeginFrame| will create a nested
   // CATransaction otherwise.
-  int NAMELEN = 20;
-  char thread_name[NAMELEN];
-  const pthread_t thread = pthread_self();
-  pthread_getname_np(thread, thread_name, NAMELEN);
-  FML_DLOG(ERROR) << "#transaction commit " << thread_name;
-  [CATransaction commit];
+
+  if ([NSThread currentThread] == [NSThread mainThread]) {
+    int NAMELEN = 20;
+    char thread_name[NAMELEN];
+    const pthread_t thread = pthread_self();
+    pthread_getname_np(thread, thread_name, NAMELEN);
+    FML_DCHECK(did_transaction_begin_ == true);
+    [CATransaction commit];
+    did_transaction_begin_ = false;
+  }
 }
 
 // |ExternalViewEmbedder|
@@ -116,12 +119,16 @@ void IOSSurfaceGL::BeginFrame(SkISize frame_size, GrContext* context, double dev
   FlutterPlatformViewsController* platform_views_controller = GetPlatformViewsController();
   FML_CHECK(platform_views_controller != nullptr);
   platform_views_controller->SetFrameSize(frame_size);
-  int NAMELEN = 20; 
-  char thread_name[NAMELEN];
-  const pthread_t thread = pthread_self();
-  pthread_getname_np(thread, thread_name, NAMELEN);
-  FML_DLOG(ERROR) << "#transaction begin " << thread_name;
-  [CATransaction begin];
+
+  if ([NSThread currentThread] == [NSThread mainThread]) {
+    FML_DCHECK(did_transaction_begin_ == false);
+    int NAMELEN = 20;
+    char thread_name[NAMELEN];
+    const pthread_t thread = pthread_self();
+    pthread_getname_np(thread, thread_name, NAMELEN);
+    [CATransaction begin];
+    did_transaction_begin_ = true;
+  }
 }
 
 void IOSSurfaceGL::EndFrame(fml::RefPtr<fml::GpuThreadMerger> gpu_thread_merger) {
@@ -165,22 +172,19 @@ SkCanvas* IOSSurfaceGL::CompositeEmbeddedView(int view_id) {
 bool IOSSurfaceGL::SubmitFrame(GrContext* context) {
   FlutterPlatformViewsController* platform_views_controller = GetPlatformViewsController();
   if (platform_views_controller == nullptr) {
-  //     int NAMELEN = 20;
-  // char thread_name[NAMELEN];
-  // const pthread_t thread = pthread_self();
-  // pthread_getname_np(thread, thread_name, NAMELEN);
-  // FML_DLOG(ERROR) << "#transaction commit " << thread_name;
-  // [CATransaction commit];
     return true;
   }
 
   bool submitted = platform_views_controller->SubmitFrame(std::move(context), context_);
-  int NAMELEN = 20;
-  char thread_name[NAMELEN];
-  const pthread_t thread = pthread_self();
-  pthread_getname_np(thread, thread_name, NAMELEN);
-  FML_DLOG(ERROR) << "#transaction commit " << thread_name;
-  [CATransaction commit];
+  if ([NSThread currentThread] == [NSThread mainThread]) {
+    int NAMELEN = 20;
+    char thread_name[NAMELEN];
+    const pthread_t thread = pthread_self();
+    pthread_getname_np(thread, thread_name, NAMELEN);
+    FML_DCHECK(did_transaction_begin_ == true);
+    [CATransaction commit];
+    did_transaction_begin_ = false;
+  }
   return submitted;
 }
 

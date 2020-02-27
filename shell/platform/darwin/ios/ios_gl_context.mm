@@ -65,7 +65,6 @@ bool IOSGLContext::MakeCurrent() {
   char thread_name[NAMELEN];
   const pthread_t thread = pthread_self();
   pthread_getname_np(thread, thread_name, NAMELEN);
-  FML_DLOG(ERROR) << "&GLContext MakeCurrent in thread: " << thread_name;
   return [EAGLContext setCurrentContext:context_.get()];
 }
 
@@ -74,7 +73,6 @@ bool IOSGLContext::ResourceMakeCurrent() {
   char thread_name[NAMELEN];
   const pthread_t thread = pthread_self();
   pthread_getname_np(thread, thread_name, NAMELEN);
-  FML_DLOG(ERROR) << "&GLContext Resource MakeCurrent in thread: " << thread_name;
   return [EAGLContext setCurrentContext:resource_context_.get()];
 }
 

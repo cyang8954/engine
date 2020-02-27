@@ -432,6 +432,7 @@ std::string Engine::DefaultRouteName() {
 }
 
 void Engine::ScheduleFrame(bool regenerate_layer_tree) {
+  TRACE_EVENT0("flutter", "Engine::ScheduleFrame");
   animator_->RequestFrame(regenerate_layer_tree);
 }
 

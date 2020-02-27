@@ -24,10 +24,12 @@ void DefaultRouteName(Dart_NativeArguments args) {
 }
 
 void ScheduleFrame(Dart_NativeArguments args) {
+  TRACE_EVENT0("flutter", "Window::ScheduleFrame");
   UIDartState::Current()->window()->client()->ScheduleFrame();
 }
 
 void Render(Dart_NativeArguments args) {
+  TRACE_EVENT0("flutter", __PRETTY_FUNCTION__);
   Dart_Handle exception = nullptr;
   Scene* scene =
       tonic::DartConverter<Scene*>::FromArguments(args, 1, exception);

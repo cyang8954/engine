@@ -27,22 +27,25 @@ const std::string& TaskRunners::GetLabel() const {
   return label_;
 }
 
+//0
 fml::RefPtr<fml::TaskRunner> TaskRunners::GetPlatformTaskRunner() const {
   return platform_;
 }
 
+//1
 fml::RefPtr<fml::TaskRunner> TaskRunners::GetUITaskRunner() const {
 
   return ui_;
 }
 
+//3
 fml::RefPtr<fml::TaskRunner> TaskRunners::GetIOTaskRunner() const {
 
   return io_;
 }
 
+//2
 fml::RefPtr<fml::TaskRunner> TaskRunners::GetGPUTaskRunner() const {
-
   return gpu_;
 }
 

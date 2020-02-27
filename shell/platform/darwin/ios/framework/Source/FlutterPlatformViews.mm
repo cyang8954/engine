@@ -166,12 +166,6 @@ void FlutterPlatformViewsController::SetFrameSize(SkISize frame_size) {
 
 void FlutterPlatformViewsController::CancelFrame() {
   composition_order_.clear();
-  //     int NAMELEN = 20;
-  // char thread_name[NAMELEN];
-  // const pthread_t thread = pthread_self();
-  // pthread_getname_np(thread, thread_name, NAMELEN);
-  // FML_DLOG(ERROR) << "#transaction commit " << thread_name;
-  // [CATransaction commit];
 }
 
 bool FlutterPlatformViewsController::HasPendingViewOperations() {
@@ -189,9 +183,6 @@ const int FlutterPlatformViewsController::kDefaultMergedLeaseDuration;
 PostPrerollResult FlutterPlatformViewsController::PostPrerollAction(
     fml::RefPtr<fml::GpuThreadMerger> gpu_thread_merger) {
   const bool uiviews_mutated = HasPendingViewOperations();
-  FML_DLOG(ERROR) << "PostPrerollAction ";
-  FML_DLOG(ERROR) << "uiviews_mutated " << uiviews_mutated;
-  FML_DLOG(ERROR) << "gpu_thread_merger->IsMerged() " << gpu_thread_merger->IsMerged();
   gpu_thread_merger_ = gpu_thread_merger;
   if (uiviews_mutated) {
     if (!gpu_thread_merger->IsMerged()) {
@@ -209,12 +200,6 @@ void FlutterPlatformViewsController::EndFrame(fml::RefPtr<fml::GpuThreadMerger> 
   if (will_merge_) {
     FML_DLOG(ERROR) << "&& EndFrame merged";
     gpu_thread_merger->MergeWithLease(kDefaultMergedLeaseDuration);
-  //       int NAMELEN = 20;
-  // char thread_name[NAMELEN];
-  // const pthread_t thread = pthread_self();
-  // pthread_getname_np(thread, thread_name, NAMELEN);
-  // FML_DLOG(ERROR) << "#transaction commit " << thread_name;
-  //     [CATransaction commit];
   }
   will_merge_ = false;
 }
@@ -289,7 +274,6 @@ UIView* FlutterPlatformViewsController::ReconstructClipViewsChain(int number_of_
     head = clippingView;
     clipIndex++;
   }
-  FML_DLOG(ERROR) << "$ ReconstructClipViewsChain";
   [head removeFromSuperview];
 
   if (indexInFlutterView > -1) {
@@ -369,7 +353,7 @@ void FlutterPlatformViewsController::CompositeWithParams(int view_id,
 SkCanvas* FlutterPlatformViewsController::CompositeEmbeddedView(int view_id) {
   // TODO(amirh): assert that this is running on the platform thread once we support the iOS
   // embedded views thread configuration.
-
+ 
   // Do nothing if the view doesn't need to be composited.
   if (views_to_recomposite_.count(view_id) == 0) {
     return picture_recorders_[view_id]->getRecordingCanvas();
@@ -401,7 +385,11 @@ bool FlutterPlatformViewsController::SubmitFrame(GrContext* gr_context,
   char thread_name[NAMELEN];
   const pthread_t thread = pthread_self();
   pthread_getname_np(thread, thread_name, NAMELEN);
-  FML_DLOG(ERROR) << "@SubmitFrame " << thread_name;
+  if (will_merge_ == true) {
+    FML_DLOG(ERROR) << "&& will_merge_ cancel frame";
+    CancelFrame();
+    return true;
+  }
 
   DisposeViews();
 
@@ -411,44 +399,21 @@ bool FlutterPlatformViewsController::SubmitFrame(GrContext* gr_context,
     auto frame = overlays_[view_id]->surface->AcquireFrame(frame_size_);
     // If frame is null, AcquireFrame already printed out an error message.
     if (frame) {
-      FML_DLOG(ERROR) << "&& platform view canvas flush";
       SkCanvas* canvas = frame->SkiaCanvas();
       canvas->drawPicture(picture_recorders_[view_id]->finishRecordingAsPicture());
       canvas->flush();
       did_submit &= frame->Submit();
     }
   }
-  if (will_merge_ == true) {
-    FML_DLOG(ERROR) << "&& will_merge_ cancel frame";
-    CancelFrame();
-    return did_submit;
-  }
   picture_recorders_.clear();
 
   if (composition_order_ == active_composition_order_) {
 
     composition_order_.clear();
-  //   if (will_merge_) {
-  //     return did_submit;
-  //   }
-  // FML_DLOG(ERROR) << "#transaction commit " << thread_name;
-    // [CATransaction commit];
     return did_submit;
   }
-  if ([NSThread currentThread] != [NSThread mainThread]) {
-    FML_DLOG(ERROR) << "SubmitFrame";
 
-    auto vtos = [](std::vector<int64_t> v) {
-      std::stringstream iss;
-      for (auto x : v) {
-        iss << x << ", ";
-      }
-      return iss.str();
-    };
-
-    FML_DLOG(ERROR) << "composition_order_ " << vtos(composition_order_);
-    FML_DLOG(ERROR) << "active_composition_order_ " << vtos(active_composition_order_);
-  }
+  FML_DCHECK([NSThread currentThread] == [NSThread mainThread]);
 
   DetachUnusedLayers();
   active_composition_order_.clear();
@@ -460,7 +425,6 @@ bool FlutterPlatformViewsController::SubmitFrame(GrContext* gr_context,
     char thread_name[NAMELEN];
     const pthread_t thread = pthread_self();
     pthread_getname_np(thread, thread_name, NAMELEN);
-    FML_DLOG(ERROR) << "@SubmitFrame add views " << thread_name;
     int view_id = composition_order_[i];
     // We added a chain of super views to the platform view to handle clipping.
     // The `platform_view_root` is the view at the top of the chain which is a direct subview of the
@@ -476,16 +440,9 @@ bool FlutterPlatformViewsController::SubmitFrame(GrContext* gr_context,
       [flutter_view addSubview:overlay];
       overlay.frame = flutter_view.bounds;
     }
-    FML_DLOG(ERROR) << "$ submit frame view added";
-
     active_composition_order_.push_back(view_id);
   }
   composition_order_.clear();
-
-  // FML_DCHECK(!will_merge_);
-
-  // FML_DLOG(ERROR) << "#transaction commit " << thread_name;
-  // [CATransaction commit];
   return did_submit;
 }
 
@@ -505,7 +462,6 @@ void FlutterPlatformViewsController::DetachUnusedLayers() {
       // The `platform_view_root` is the view at the top of the chain which is a direct subview of
       // the `FlutterView`.
       UIView* platform_view_root = root_views_[view_id].get();
-      FML_DLOG(ERROR) << "$ DetachUnusedLayers";
       [platform_view_root removeFromSuperview];
       [overlays_[view_id]->overlay_view.get() removeFromSuperview];
     }
@@ -516,7 +472,6 @@ void FlutterPlatformViewsController::DisposeViews() {
   if (views_to_dispose_.empty()) {
     return;
   }
-  FML_DLOG(ERROR) << "$ Dispose views";
   for (int64_t viewId : views_to_dispose_) {
     UIView* root_view = root_views_[viewId].get();
     [root_view removeFromSuperview];
@@ -543,7 +498,6 @@ void FlutterPlatformViewsController::EnsureOverlayInitialized(
   auto overlay_it = overlays_.find(overlay_id);
 
   if (!gr_context) {
-    FML_DLOG(ERROR) << "No GrContext";
     if (overlays_.count(overlay_id) != 0) {
       return;
     }

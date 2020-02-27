@@ -936,6 +936,7 @@ void Shell::OnAnimatorDraw(fml::RefPtr<Pipeline<flutter::LayerTree>> pipeline) {
        &waiting_for_first_frame_condition = waiting_for_first_frame_condition_,
        rasterizer = rasterizer_->GetWeakPtr(),
        pipeline = std::move(pipeline)]() {
+      TRACE_EVENT0("flutter", "Shell::OnAnimatorDraw Draw");
         if (rasterizer) {
           rasterizer->Draw(pipeline);
 

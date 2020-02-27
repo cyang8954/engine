@@ -103,7 +103,10 @@ void MessageLoopImpl::DoRun() {
   // The message loop is shutting down. Check if there are expired tasks. This
   // is the last chance for expired tasks to be serviced. Make sure the
   // terminated flag is already set so we don't accrue additional tasks now.
-  RunExpiredTasksNow();
+  {
+    TRACE_EVENT0("fml", "MessageLoopImpl::RunExpiredTasksNow");
+    RunExpiredTasksNow();
+  }
 
   // When the message loop is in the process of shutting down, pending tasks
   // should be destructed on the message loop's thread. We have just returned
@@ -125,38 +128,27 @@ void MessageLoopImpl::FlushTasks(FlushType type) {
 
   task_queue_->GetTasksToRunNow(queue_id_, type, invocations);
 
-  TaskQueueId queueId = GetTaskQueueId();
   for (const auto& invocation : invocations) {
-    const TaskQueueId subsumed = task_queue_->queue_entries_.at(queueId)->owner_of;
-    const TaskQueueId owner = task_queue_->queue_entries_.at(queueId)->subsumed_by;
-    if (subsumed != _kUnmerged|| owner != _kUnmerged) {
-        // std::lock_guard guard(invoke_mutex_);
-        // FML_DLOG(ERROR) << "@== mutex guard invoke queue_id " << queueId;
-        // FML_DLOG(ERROR) << "@== mutex guard invoke owner " << owner;
-        // FML_DLOG(ERROR) << "@== mutex guard invoke subsumed " << subsumed;
-        invocation();
-        std::vector<fml::closure> observers =
-            task_queue_->GetObserversToNotify(queue_id_);
-        for (const auto& observer : observers) {
-          observer();
-        }
-    } else {
-        invocation();
-        std::vector<fml::closure> observers =
-            task_queue_->GetObserversToNotify(queue_id_);
-        for (const auto& observer : observers) {
-          observer();
-        }
+    invocation();
+    std::vector<fml::closure> observers =
+        task_queue_->GetObserversToNotify(queue_id_);
+    for (const auto& observer : observers) {
+      observer();
     }
-
   }
 }
 
 void MessageLoopImpl::RunExpiredTasksNow() {
-  FlushTasks(FlushType::kAll);
+  TRACE_EVENT0("fml", "MessageLoop::RunExpiredTasksNow");
+  if (queue_id_ == 0) {
+      FlushTasks(FlushType::kAll);
+  } else {
+      FlushTasks(FlushType::kSingle);
+  }
 }
 
 void MessageLoopImpl::RunSingleExpiredTaskNow() {
+  TRACE_EVENT0("fml", "MessageLoop::RunSingleExpiredTaskNow");
   FlushTasks(FlushType::kSingle);
 }
 

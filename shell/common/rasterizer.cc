@@ -127,12 +127,14 @@ void Rasterizer::Draw(fml::RefPtr<Pipeline<flutter::LayerTree>> pipeline) {
   // if the raster status is to resubmit the frame, we push the frame to the
   // front of the queue and also change the consume status to more available.
   if (raster_status == RasterStatus::kResubmit) {
+    TRACE_EVENT0("flutter", "GPURasterizer::Draw kResubmit pipeline consume More");
     auto front_continuation = pipeline->ProduceToFront();
     auto* external_view_embedder = surface_->GetExternalViewEmbedder();
     front_continuation.Complete(std::move(resubmitted_layer_tree_));
     consume_result = PipelineConsumeResult::MoreAvailable;
     external_view_embedder->EndFrame(gpu_thread_merger_);
   } else if (raster_status == RasterStatus::kEnqueuePipeline) {
+    TRACE_EVENT0("flutter", "GPURasterizer::Draw kEnqueuePipeline pipeline consume More");
     consume_result = PipelineConsumeResult::MoreAvailable;
   }
 
@@ -143,6 +145,7 @@ void Rasterizer::Draw(fml::RefPtr<Pipeline<flutter::LayerTree>> pipeline) {
       task_runners_.GetGPUTaskRunner()->PostTask(
           [weak_this = weak_factory_.GetWeakPtr(), pipeline]() {
             if (weak_this) {
+              TRACE_EVENT0("flutter", "GPURasterizer::Draw MoreAvailable");
               weak_this->Draw(pipeline);
             }
           });

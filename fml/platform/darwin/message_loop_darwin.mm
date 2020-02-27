@@ -71,16 +71,7 @@ void MessageLoopDarwin::WakeUp(fml::TimePoint time_point) {
 
 void MessageLoopDarwin::OnTimerFire(CFRunLoopTimerRef timer, MessageLoopDarwin* loop) {
   @autoreleasepool {
-    // RunExpiredTasksNow rearms the timer as appropriate via a call to WakeUp.
-    TaskQueueId queueId = loop->queue_id_;
-    const TaskQueueId subsumed = loop->task_queue_->queue_entries_.at(queueId)->owner_of;
-    const TaskQueueId owner = loop->task_queue_->queue_entries_.at(queueId)->subsumed_by;
-    if (subsumed != _kUnmerged|| owner != _kUnmerged) {
-//      std::lock_guard guard(invoke_mutex_);
-      loop->RunExpiredTasksNow();
-    } else {
-      loop->RunExpiredTasksNow();
-    }
+    loop->RunExpiredTasksNow();
   }
 }
 

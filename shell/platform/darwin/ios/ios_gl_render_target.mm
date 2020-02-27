@@ -31,7 +31,6 @@ IOSGLRenderTarget::IOSGLRenderTarget(fml::scoped_nsobject<CAEAGLLayer> layer,
   char thread_name[NAMELEN];
   const pthread_t thread = pthread_self();
   pthread_getname_np(thread, thread_name, NAMELEN);
-  FML_DLOG(ERROR) << "&GLContext IOSGLRenderTarget setCurrent in thread: " << thread_name;
   bool context_current = [EAGLContext setCurrentContext:context_];
 
   FML_DCHECK(context_current);
@@ -72,7 +71,6 @@ IOSGLRenderTarget::~IOSGLRenderTarget() {
   char thread_name[NAMELEN];
   const pthread_t thread = pthread_self();
   pthread_getname_np(thread, thread_name, NAMELEN);
-  FML_DLOG(ERROR) << "&GLContext ~IOSGLRenderTarget setCurrent in thread: " << thread_name;
   [EAGLContext setCurrentContext:context_];
   FML_DCHECK(glGetError() == GL_NO_ERROR);
 
@@ -82,7 +80,6 @@ IOSGLRenderTarget::~IOSGLRenderTarget() {
 
   FML_DCHECK(glGetError() == GL_NO_ERROR);
 
-  FML_DLOG(ERROR) << "&GLContext ~IOSGLRenderTarget setCurrent in thread: " << thread_name;
   [EAGLContext setCurrentContext:context];
 }
 
@@ -121,7 +118,6 @@ bool IOSGLRenderTarget::UpdateStorageSizeIfNecessary() {
   char thread_name[NAMELEN];
   const pthread_t thread = pthread_self();
   pthread_getname_np(thread, thread_name, NAMELEN);
-    FML_DLOG(ERROR) << "&GLContext UpdateStorageSizeIfNecessary in thread: " << thread_name;
 
   if (![EAGLContext setCurrentContext:context_]) {
     return false;

@@ -150,10 +150,14 @@ class Pipeline : public fml::RefCountedThreadSafe<Pipeline<R>> {
     }
 
     {
-      TRACE_EVENT0("flutter", "PipelineConsume");
-      consumer(std::move(resource));
+      if (items_count > 0) {
+        TRACE_EVENT0("flutter", "PipelineConsume More");
+        consumer(std::move(resource));
+      } else {
+        TRACE_EVENT0("flutter", "PipelineConsume None");
+        consumer(std::move(resource));
+      }
     }
-    FML_DLOG(ERROR) << "empty_signal";
     empty_.Signal();
     --inflight_;
 
@@ -179,7 +183,6 @@ class Pipeline : public fml::RefCountedThreadSafe<Pipeline<R>> {
     }
 
     // Ensure the queue mutex is not held as that would be a pessimization.
-    FML_DLOG(ERROR) << "available_signal";
     available_.Signal();
   }
 
@@ -192,7 +195,6 @@ class Pipeline : public fml::RefCountedThreadSafe<Pipeline<R>> {
       }
     }
 
-    FML_DLOG(ERROR) << "available_signal";
     // Ensure the queue mutex is not held as that would be a pessimization.
     available_.Signal();
   }

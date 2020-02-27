@@ -33,11 +33,12 @@ Animator::Animator(Delegate& delegate,
       // TODO(dnfield): We should remove this logic and set the pipeline depth
       // back to 2 in this case. See
       // https://github.com/flutter/engine/pull/9132 for discussion.
-      layer_tree_pipeline_(fml::MakeRefCounted<LayerTreePipeline>(
-          task_runners.GetPlatformTaskRunner() ==
-                  task_runners.GetGPUTaskRunner()
-              ? 1
-              : 2)),
+      // layer_tree_pipeline_(fml::MakeRefCounted<LayerTreePipeline>(
+      //     task_runners.GetPlatformTaskRunner() ==
+      //             task_runners.GetGPUTaskRunner()
+      //         ? 1
+      //         : 2)),
+      layer_tree_pipeline_(fml::MakeRefCounted<LayerTreePipeline>(1)),
 #endif  // FLUTTER_SHELL_ENABLE_METAL
       pending_frame_semaphore_(1),
       frame_number_(1),
@@ -111,7 +112,6 @@ void Animator::BeginFrame(fml::TimePoint frame_start_time,
   frame_scheduled_ = false;
   notify_idle_task_id_++;
   regenerate_layer_tree_ = false;
-  FML_DLOG(ERROR) << "semaphore_signal";
   pending_frame_semaphore_.Signal();
 
   if (!producer_continuation_) {

@@ -36,7 +36,6 @@ void TaskRunner::PostDelayedTask(const fml::closure& task,
 
 TaskQueueId TaskRunner::GetTaskQueueId() {
   FML_DCHECK(loop_);
-  FML_DLOG(ERROR) << "task runner " << this;
   return loop_->GetTaskQueueId();
 }
 

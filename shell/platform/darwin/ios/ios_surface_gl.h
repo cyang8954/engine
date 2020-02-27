@@ -85,6 +85,7 @@ class IOSSurfaceGL final : public IOSSurface,
   std::unique_ptr<IOSGLRenderTarget> render_target_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(IOSSurfaceGL);
+  bool did_transaction_begin_ = false;
 };
 
 }  // namespace flutter

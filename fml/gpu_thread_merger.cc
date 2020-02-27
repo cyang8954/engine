@@ -18,8 +18,6 @@ GpuThreadMerger::GpuThreadMerger(fml::TaskQueueId platform_queue_id,
       gpu_queue_id_(gpu_queue_id),
       task_queues_(fml::MessageLoopTaskQueues::GetInstance()),
       lease_term_(kLeaseNotSet) {
-  FML_DLOG(ERROR) << "platform id " << platform_queue_id;
-  FML_DLOG(ERROR) << "gpu_queue_id id " << gpu_queue_id;
   is_merged_ = task_queues_->Owns(platform_queue_id_, gpu_queue_id_);
 }
 
@@ -35,8 +33,6 @@ void GpuThreadMerger::MergeWithLease(size_t lease_term) {
 }
 
 bool GpuThreadMerger::IsOnRasterizingThread() {
-  TRACE_EVENT0("flutter", __PRETTY_FUNCTION__);
-
   const auto current_queue_id = MessageLoop::GetCurrentTaskQueueId();
   if (is_merged_) {
     return current_queue_id == platform_queue_id_;
@@ -47,9 +43,7 @@ bool GpuThreadMerger::IsOnRasterizingThread() {
 
 void GpuThreadMerger::ExtendLeaseTo(size_t lease_term) {
   TRACE_EVENT0("flutter", __PRETTY_FUNCTION__);
-  FML_DLOG(ERROR) << "$ GpuThreadMerger ExtendLeaseTo";
   FML_DCHECK(lease_term > 0) << "lease_term should be positive.";
-  FML_DLOG(ERROR) << "Lease extended";
   if (lease_term_ != kLeaseNotSet && (int)lease_term > lease_term_) {
     lease_term_ = lease_term;
   }
