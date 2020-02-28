@@ -43,6 +43,10 @@ class PlatformSemaphore {
     }
   }
 
+  int GetValue() {
+    return 0;
+  }
+
  private:
   dispatch_semaphore_t _sem;
   const uint32_t _initial;
@@ -83,6 +87,11 @@ class PlatformSemaphore {
     if (_sem != nullptr) {
       ReleaseSemaphore(_sem, 1, NULL);
     }
+  }
+
+  int GetValue() {
+    FML_DCHECK(false);
+    return 0;
   }
 
  private:
@@ -133,6 +142,14 @@ class PlatformSemaphore {
     return;
   }
 
+  int GetValue() {
+    int value;
+    int result = sem_getvalue(&sem, &value);
+    FML_DCHECK(result == 0);
+    return value;
+  }
+
+
  private:
   bool valid_;
   sem_t sem_;
@@ -160,6 +177,10 @@ bool Semaphore::TryWait() {
 
 void Semaphore::Signal() {
   return _impl->Signal();
+}
+
+int Semaphore::GetValue(){
+  return _impl->GetValue();
 }
 
 }  // namespace fml

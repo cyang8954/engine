@@ -29,6 +29,10 @@ size_t GetNextPipelineTraceID();
 template <class R>
 class Pipeline : public fml::RefCountedThreadSafe<Pipeline<R>> {
  public:
+  const uint32_t depth_;
+  fml::Semaphore empty_;
+  fml::Semaphore available_;
+  std::atomic<int> inflight_;
   using Resource = R;
   using ResourcePtr = std::unique_ptr<Resource>;
 
@@ -99,6 +103,7 @@ class Pipeline : public fml::RefCountedThreadSafe<Pipeline<R>> {
     if (!empty_.TryWait()) {
       return {};
     }
+    FML_DLOG(ERROR) << "Produce empty_ value " << empty_.GetValue();
     ++inflight_;
     FML_TRACE_COUNTER("flutter", "Pipeline Depth",
                       reinterpret_cast<int64_t>(this),      //
@@ -159,6 +164,48 @@ class Pipeline : public fml::RefCountedThreadSafe<Pipeline<R>> {
       }
     }
     empty_.Signal();
+    FML_DLOG(ERROR) << "ProduceToFront empty_ value " << empty_.GetValue();
+    --inflight_;
+
+    TRACE_FLOW_END("flutter", "PipelineItem", trace_id);
+    TRACE_EVENT_ASYNC_END0("flutter", "PipelineItem", trace_id);
+
+    return items_count > 0 ? PipelineConsumeResult::MoreAvailable
+                           : PipelineConsumeResult::Done;
+  }
+
+    /// @note Procedure doesn't copy all closures.
+  FML_WARN_UNUSED_RESULT
+  PipelineConsumeResult ConsumeWithoutSingal(const Consumer& consumer) {
+    if (consumer == nullptr) {
+      return PipelineConsumeResult::NoneAvailable;
+    }
+
+    if (!available_.TryWait()) {
+      return PipelineConsumeResult::NoneAvailable;
+    }
+
+    ResourcePtr resource;
+    size_t trace_id = 0;
+    size_t items_count = 0;
+
+    {
+      std::scoped_lock lock(queue_mutex_);
+      std::tie(resource, trace_id) = std::move(queue_.front());
+      queue_.pop_front();
+      items_count = queue_.size();
+    }
+
+    {
+      if (items_count > 0) {
+        TRACE_EVENT0("flutter", "PipelineConsume More");
+        consumer(std::move(resource));
+      } else {
+        TRACE_EVENT0("flutter", "PipelineConsume None");
+        consumer(std::move(resource));
+      }
+    }
+    FML_DLOG(ERROR) << "ProduceToFront empty_ value " << empty_.GetValue();
     --inflight_;
 
     TRACE_FLOW_END("flutter", "PipelineItem", trace_id);
@@ -169,10 +216,6 @@ class Pipeline : public fml::RefCountedThreadSafe<Pipeline<R>> {
   }
 
  private:
-  const uint32_t depth_;
-  fml::Semaphore empty_;
-  fml::Semaphore available_;
-  std::atomic<int> inflight_;
   std::mutex queue_mutex_;
   std::deque<std::pair<ResourcePtr, size_t>> queue_;
 

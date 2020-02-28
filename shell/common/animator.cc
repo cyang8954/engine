@@ -113,7 +113,6 @@ void Animator::BeginFrame(fml::TimePoint frame_start_time,
   notify_idle_task_id_++;
   regenerate_layer_tree_ = false;
   pending_frame_semaphore_.Signal();
-
   if (!producer_continuation_) {
     // We may already have a valid pipeline continuation in case a previous
     // begin frame did not result in an Animation::Render. Simply reuse that

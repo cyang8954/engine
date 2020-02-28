@@ -2,14 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.6
 part of engine;
 
 /// Allocates and caches 0 or more canvas(s) for [BitmapCanvas].
 ///
 /// [BitmapCanvas] signals allocation of first canvas using allocateCanvas.
 /// When a painting command such as drawImage or drawParagraph requires
-/// multiple canvases for correct compositing, it calls allocateExtraCanvas and
-/// adds the canvas(s) to a [_pool] of active canvas(s).
+/// multiple canvases for correct compositing, it calls [allocateExtraCanvas]
+/// and adds the canvas(s) to a [_pool] of active canvas(s).
 ///
 /// To make sure transformations and clips are preserved correctly when a new
 /// canvas is allocated, [_CanvasPool] replays the current stack on the newly
@@ -29,6 +30,7 @@ class _CanvasPool extends _SaveStackTracking {
   List<html.CanvasElement> _reusablePool;
   // Current canvas element or null if marked for lazy allocation.
   html.CanvasElement _canvas;
+
   html.HtmlElement _rootElement;
   int _saveContextCount = 0;
 
@@ -93,10 +95,33 @@ class _CanvasPool extends _SaveStackTracking {
         width: _widthInBitmapPixels,
         height: _heightInBitmapPixels,
       );
+      if (_canvas == null) {
+        // Evict BitmapCanvas(s) and retry.
+        _reduceCanvasMemoryUsage();
+        _canvas = html.CanvasElement(
+          width: _widthInBitmapPixels,
+          height: _heightInBitmapPixels,
+        );
+      }
       _canvas.style
         ..position = 'absolute'
         ..width = '${cssWidth}px'
         ..height = '${cssHeight}px';
+    }
+
+    // When the picture has a 90-degree transform and clip in its
+    // ancestor layers, it triggers a bug in Blink and Webkit browsers
+    // that results in canvas obscuring text that should be painted on
+    // top. Setting z-index to any negative value works around the bug.
+    // This workaround only works with the first canvas. If more than
+    // one element have negative z-index, the bug is triggered again.
+    //
+    // Possible Blink bugs that are causing this:
+    // * https://bugs.chromium.org/p/chromium/issues/detail?id=370604
+    // * https://bugs.chromium.org/p/chromium/issues/detail?id=586601
+    final bool isFirstChildElement = _rootElement.firstChild == null;
+    if (isFirstChildElement) {
+      _canvas.style.zIndex = '-1';
     }
     _rootElement.append(_canvas);
     _context = _canvas.context2D;

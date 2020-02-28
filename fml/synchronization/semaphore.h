@@ -27,6 +27,8 @@ class Semaphore {
 
   void Signal();
 
+  int GetValue();
+
  private:
   std::unique_ptr<PlatformSemaphore> _impl;
 

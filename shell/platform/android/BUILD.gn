@@ -138,8 +138,10 @@ android_java_sources = [
   "io/flutter/embedding/android/FlutterSurfaceView.java",
   "io/flutter/embedding/android/FlutterTextureView.java",
   "io/flutter/embedding/android/FlutterView.java",
+  "io/flutter/embedding/android/RenderMode.java",
   "io/flutter/embedding/android/SplashScreen.java",
   "io/flutter/embedding/android/SplashScreenProvider.java",
+  "io/flutter/embedding/android/TransparencyMode.java",
   "io/flutter/embedding/engine/FlutterEngine.java",
   "io/flutter/embedding/engine/FlutterEngineCache.java",
   "io/flutter/embedding/engine/FlutterEnginePluginRegistry.java",
@@ -433,10 +435,12 @@ action("robolectric_tests") {
     "test/io/flutter/embedding/engine/systemchannels/PlatformChannelTest.java",
     "test/io/flutter/external/FlutterLaunchTests.java",
     "test/io/flutter/plugin/common/StandardMessageCodecTest.java",
+    "test/io/flutter/plugin/editing/InputConnectionAdaptorTest.java",
     "test/io/flutter/plugin/editing/TextInputPluginTest.java",
     "test/io/flutter/plugin/platform/PlatformPluginTest.java",
     "test/io/flutter/plugin/platform/SingleViewPresentationTest.java",
     "test/io/flutter/plugins/GeneratedPluginRegistrant.java",
+    "test/io/flutter/util/FakeKeyEvent.java",
     "test/io/flutter/util/PreconditionsTest.java",
   ]
 

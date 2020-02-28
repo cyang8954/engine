@@ -1,21 +1,8 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+// @dart = 2.6
 part of engine;
-
-// TODO(hterkelsen): Get rid of this once we can register font families with
-//     custom names.
-/// CanvasKit does not yet allow us to specify family names when registering
-/// fonts. CanvasKit reads the font name from the font's bytes. So, we map
-/// some common family names to how they are registered in the Gallery app.
-const Map<String, String> _fontFamilyOverrides = <String, String>{
-  'GoogleSans': 'Google Sans',
-  'GoogleSansDisplay': 'Google Sans Display',
-  'MaterialIcons': 'Material Icons',
-  'LibreFranklin': 'Libre Franklin',
-  'AbrilFatface': 'Abril Fatface',
-  'packages/cupertino_icons/CupertinoIcons': 'CupertinoIcons',
-};
 
 class SkParagraphStyle implements ui.ParagraphStyle {
   SkParagraphStyle({
@@ -72,8 +59,8 @@ class SkParagraphStyle implements ui.ParagraphStyle {
         !skiaFontCollection.registeredFamilies.contains(fontFamily)) {
       fontFamily = 'Roboto';
     }
-    if (_fontFamilyOverrides.containsKey(fontFamily)) {
-      fontFamily = _fontFamilyOverrides[fontFamily];
+    if (skiaFontCollection.fontFamilyOverrides.containsKey(fontFamily)) {
+      fontFamily = skiaFontCollection.fontFamilyOverrides[fontFamily];
     }
     skTextStyle['fontFamilies'] = [fontFamily];
 
@@ -213,11 +200,12 @@ class SkTextStyle implements ui.TextStyle {
       fontFamily = 'Roboto';
     }
 
-    if (_fontFamilyOverrides.containsKey(fontFamily)) {
-      fontFamily = _fontFamilyOverrides[fontFamily];
+    if (skiaFontCollection.fontFamilyOverrides.containsKey(fontFamily)) {
+      fontFamily = skiaFontCollection.fontFamilyOverrides[fontFamily];
     }
     List<String> fontFamilies = <String>[fontFamily];
-    if (fontFamilyFallback != null) {
+    if (fontFamilyFallback != null &&
+        !fontFamilyFallback.every((font) => fontFamily == font)) {
       fontFamilies.addAll(fontFamilyFallback);
     }
 
