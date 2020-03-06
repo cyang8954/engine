@@ -119,6 +119,10 @@ class Pipeline : public fml::RefCountedThreadSafe<Pipeline<R>> {
   // Note: Use |Pipeline::Produce| where possible. This should only be
   // used to en-queue high-priority resources.
   ProducerContinuation ProduceToFront() {
+    if (!empty_.TryWait()) {
+      return {};
+    }
+    ++inflight_;
     return ProducerContinuation{
         std::bind(&Pipeline::ProducerCommitFront, this, std::placeholders::_1,
                   std::placeholders::_2),  // continuation
@@ -186,9 +190,6 @@ class Pipeline : public fml::RefCountedThreadSafe<Pipeline<R>> {
     {
       std::scoped_lock lock(queue_mutex_);
       queue_.emplace_front(std::move(resource), trace_id);
-      while (queue_.size() > depth_) {
-        queue_.pop_back();
-      }
     }
 
     // Ensure the queue mutex is not held as that would be a pessimization.
