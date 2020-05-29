@@ -268,6 +268,7 @@ void Engine::OnOutputSurfaceCreated() {
 }
 
 void Engine::OnOutputSurfaceDestroyed() {
+  // This method must be thread safe.
   have_surface_ = false;
   StopAnimator();
 }
@@ -326,7 +327,6 @@ bool Engine::HandleLifecyclePlatformMessage(PlatformMessage* message) {
     activity_running_ = true;
     StartAnimatorIfPossible();
   }
-
   // Always schedule a frame when the app does become active as per API
   // recommendation
   // https://developer.apple.com/documentation/uikit/uiapplicationdelegate/1622956-applicationdidbecomeactive?language=objc

@@ -6,6 +6,7 @@
 #define FLUTTER_SHELL_COMMON_ANIMATOR_H_
 
 #include <deque>
+#include <mutex>
 
 #include "flutter/common/task_runners.h"
 #include "flutter/fml/memory/ref_ptr.h"
@@ -111,6 +112,7 @@ class Animator final {
   bool dimension_change_pending_;
   SkISize last_layer_tree_size_;
   std::deque<uint64_t> trace_flow_ids_;
+  std::mutex paused_mutex_;
 
   fml::WeakPtrFactory<Animator> weak_factory_;
 

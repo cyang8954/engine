@@ -618,6 +618,8 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   ///             submitted for rendering will be dropped. If/when a new surface
   ///             is acquired, a new layer tree must be generated.
   ///
+  ///             This method is thread safe.
+  ///
   /// @see        `OnOutputSurfaceCreated`
   ///
   void OnOutputSurfaceDestroyed();
@@ -749,7 +751,7 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   ViewportMetrics viewport_metrics_;
   std::shared_ptr<AssetManager> asset_manager_;
   bool activity_running_;
-  bool have_surface_;
+  std::atomic<bool> have_surface_;
   FontCollection font_collection_;
   ImageDecoder image_decoder_;
   TaskRunners task_runners_;

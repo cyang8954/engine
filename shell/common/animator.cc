@@ -57,15 +57,18 @@ float Animator::GetDisplayRefreshRate() const {
 }
 
 void Animator::Stop() {
+  std::unique_lock<std::mutex> locker(paused_mutex_);
   paused_ = true;
 }
 
 void Animator::Start() {
-  if (!paused_) {
-    return;
+  {
+    std::unique_lock<std::mutex> locker(paused_mutex_);
+    if (!paused_) {
+      return;
+    }
+    paused_ = false;
   }
-
-  paused_ = false;
   RequestFrame();
 }
 
@@ -203,6 +206,7 @@ void Animator::DrawLastLayerTree() {
 }
 
 void Animator::RequestFrame(bool regenerate_layer_tree) {
+  std::unique_lock<std::mutex> locker(paused_mutex_);
   if (regenerate_layer_tree) {
     regenerate_layer_tree_ = true;
   }
