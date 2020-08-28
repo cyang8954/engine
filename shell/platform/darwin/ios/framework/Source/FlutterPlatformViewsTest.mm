@@ -514,10 +514,10 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
   auto thread_task_runner = CreateNewThread("FlutterPlatformViewsTest");
   flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
-                               /*platform=*/thread_task_runner,
-                               /*raster=*/thread_task_runner,
-                               /*ui=*/thread_task_runner,
-                               /*io=*/thread_task_runner);
+                              /*platform=*/thread_task_runner,
+                              /*raster=*/thread_task_runner,
+                              /*ui=*/thread_task_runner,
+                              /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
@@ -535,7 +535,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   flutterPlatformViewsController->OnMethodCall(
       [FlutterMethodCall
           methodCallWithMethodName:@"create"
-                         arguments:@{@"id" : @2, @"viewType" : @"MockFlutterPlatformView"}],
+                        arguments:@{@"id" : @2, @"viewType" : @"MockFlutterPlatformView"}],
       result);
 
   XCTAssertNotNil(gMockPlatformView);
@@ -543,11 +543,10 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   // Find touch inteceptor view
   UIView* touchInteceptorView = gMockPlatformView;
   while (touchInteceptorView != nil &&
-         ![touchInteceptorView isKindOfClass:[FlutterTouchInterceptingView class]]) {
+        ![touchInteceptorView isKindOfClass:[FlutterTouchInterceptingView class]]) {
     touchInteceptorView = touchInteceptorView.superview;
   }
   XCTAssertNotNil(touchInteceptorView);
-
   // Find ForwardGestureRecognizer
   UIGestureRecognizer* forwardGectureRecognizer = nil;
   for (UIGestureRecognizer* gestureRecognizer in touchInteceptorView.gestureRecognizers) {
@@ -558,15 +557,15 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   }
 
   // Before setting flutter view controller, events are not dispatched.
-  NSSet* touches1 = OCMClassMock([NSSet class]);
-  UIEvent* event1 = OCMClassMock([UIEvent class]);
+  NSSet* touches1 = [[[NSSet alloc] init] autorelease];
+  UIEvent* event1 = [[[UIEvent alloc] init] autorelease];
   UIViewController* mockFlutterViewContoller = OCMClassMock([UIViewController class]);
   [forwardGectureRecognizer touchesBegan:touches1 withEvent:event1];
   OCMReject([mockFlutterViewContoller touchesBegan:touches1 withEvent:event1]);
 
   // Set flutter view controller allows events to be dispatched.
-  NSSet* touches2 = OCMClassMock([NSSet class]);
-  UIEvent* event2 = OCMClassMock([UIEvent class]);
+  NSSet* touches2 = [[[NSSet alloc] init] autorelease];
+  UIEvent* event2 = [[[UIEvent alloc] init] autorelease];
   flutterPlatformViewsController->SetFlutterViewController(mockFlutterViewContoller);
   [forwardGectureRecognizer touchesBegan:touches2 withEvent:event2];
   OCMVerify([mockFlutterViewContoller touchesBegan:touches2 withEvent:event2]);
